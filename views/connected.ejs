@@ -27,6 +27,44 @@
         $("#result").html(JSON.stringify(data, null, 2))
       })
     }
+    
+    var invoiceData = {};
+    var custData = {};
+    function customerCall(customerRefValue)  {
+      console.log("CustomerRef.value in customerCall: " + customerRefValue);
+
+      $("#result").html('Loading...')
+      $.get("/api_call/customer"+customerRefValue, function(data) {
+        custData = data;
+
+      // Display the data on the HTML page (optional)
+      $("#result").html(JSON.stringify(custData, null, 2));
+      console.log(custData);
+      })
+      
+    }
+
+    function invoiceCall() {
+    console.log("\n\n\ninside invoice call function \n\n\n");
+    $("#result").html('Loading...');
+    $.get("/api_call/invoice", function(data) {
+      // Save the data to the invoiceData variable
+      invoiceData = data.QueryResponse.Invoice[0];
+
+      // Display the data on the HTML page (optional)
+      $("#result").html(JSON.stringify(invoiceData, null, 2));
+
+      // You can now use the invoiceData variable elsewhere in your code
+      // For example, you can access specific properties like invoiceData.DocNumber, invoiceData.CustomerRef, etc.
+
+      console.log("result received for invoice : " + JSON.stringify(invoiceData, null, 2));
+
+      // Call the customerCall function here to use the invoiceData
+      customerCall(invoiceData.CustomerRef.value);
+    });
+
+  }
+ 
   </script>
 </head>
 <body>
@@ -36,8 +74,10 @@
   <p>Would you like to make a sample API call?</p>
   <div>
     <button onclick="apiCall()">QuickBooks API Call</button>
+    <button onclick="invoiceCall()">Invoice Call</button>
     <button onclick="refreshCall()">Refresh Token Call</button>
     <button onclick="revokeCall()">Revoke Token Call</button>
+    <!-- <button onclick="customerCall()">Customer</button> -->
     <br><br>
     <div><code id="result"></code></div>
 </body>
