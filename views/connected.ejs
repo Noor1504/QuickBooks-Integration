@@ -64,7 +64,22 @@
     });
 
   }
- 
+  window.invoiceCall = invoiceCall;
+
+  function getBoardData() {
+    console.log("inside get board data")
+  $("#boardDataResult").html('Loading...');
+  // Make a GET request to the new route on your server to get board data
+  $.get("api_call/get_board_data", function (data) {
+    // Display the data on the HTML page
+    $("#boardDataResult").html(JSON.stringify(data, null, 2));
+  }).fail(function (error) {
+    console.error("Error while getting board data:", error);
+    $("#boardDataResult").html('Error: ' + JSON.stringify(error));
+  });
+}
+
+
   </script>
 </head>
 <body>
@@ -77,7 +92,10 @@
     <button onclick="invoiceCall()">Invoice Call</button>
     <button onclick="refreshCall()">Refresh Token Call</button>
     <button onclick="revokeCall()">Revoke Token Call</button>
-    <!-- <button onclick="customerCall()">Customer</button> -->
+    <button onclick="getBoardData()">Get Board Data</button>
+<br><br>
+<div><code id="boardDataResult"></code></div>
+
     <br><br>
     <div><code id="result"></code></div>
 </body>

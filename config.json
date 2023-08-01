@@ -1,7 +1,7 @@
 {
   "clientId": "AB37yKv4EQyx7mBVPdVDVPJn4RLoAGE4YkBWoWm6ZUqvyFR8RP",
   "clientSecret": "0ZYUyGRnnDwQzRNDq9wbU8JzUoDJSUR41QeTpqJQ",
-
+  "boardId": "",
   "redirectUri": "http://localhost:3000/callback",
   "configurationEndpoint": "https://developer.api.intuit.com/.well-known/openid_sandbox_configuration/",
   "api_uri": "https://sandbox-quickbooks.api.intuit.com/v3/company/",
@@ -26,5 +26,7 @@
       "phone",
       "address"
     ]
-  }
+  },
+  "_locals": {},
+  "foundBoardId": "1808846275"
 }

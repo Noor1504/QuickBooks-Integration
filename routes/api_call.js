@@ -3,6 +3,8 @@ var config = require("../config.json");
 var request = require("request");
 var express = require("express");
 var router = express.Router();
+// Assuming that app.cjs is in the same directory as api_call.js
+const { getBoardData } = require("../app.cjs");
 
 /** /api_call **/
 router.get("/", function (req, res) {
@@ -21,6 +23,7 @@ router.get("/", function (req, res) {
     "/companyinfo/" +
     req.session.realmId;
   console.log("Making API call to: " + url);
+
   var requestObj = {
     url: url,
     headers: {
@@ -101,6 +104,29 @@ router.get("/refresh", function (req, res) {
       res.json(err);
     }
   );
+});
+
+// Add this route to handle the board data retrieval
+router.get("/get_board_data", async function (req, res) {
+  console.log("api call get board data");
+  try {
+    const boardId = config.foundBoardId;
+    console.log("current board id : ", boardId);
+    if (!boardId) {
+      console.log("Board ID not found in session.");
+      res.status(400).json({ error: "Board ID not found in session." });
+      return;
+    }
+
+    // Call the function to get board data using the Monday API
+    const boardData = await getBoardData(boardId);
+
+    // Send the board data as JSON response
+    res.json(boardData);
+  } catch (error) {
+    console.error("Error while retrieving board data:", error);
+    res.status(500).json({ error: "Error while retrieving board data." });
+  }
 });
 
 router.get("/invoice", function (req, res) {
