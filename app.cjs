@@ -3,7 +3,8 @@ const express = require("express");
 const session = require("express-session");
 const mondaySdk = require("monday-sdk-js");
 const fs = require("fs/promises");
-const React = require("react");
+const { invoiceCall } = require("./routes/connected");
+
 const { useState } = require("react");
 const app = express(); // Create the Express app instance
 const sessionMiddleware = session({
@@ -161,7 +162,7 @@ const getBoardData = async (boardId) => {
     const docNum = extractedData[i].name;
     console.log("DocNum : ", docNum);
     console.log("calling invoice call from app.cjs");
-    // await invoiceCall();
+    await invoiceCall();
     console.log("done caling func");
     // await monday
     // .api(
@@ -243,7 +244,8 @@ const getBoardData = async (boardId) => {
   app.use("/callback", require("./routes/callback.js"));
 
   // Connected - call OpenID and render connected view
-  app.use("/connected", require("./routes/connected.js", config));
+  const connectedRouter = require("./routes/connected.js");
+  app.use("/connected", connectedRouter);
 
   // Call an example API over OAuth2
   app.use("/api_call", require("./routes/api_call.js", { config }));

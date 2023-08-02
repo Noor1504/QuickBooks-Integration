@@ -38,5 +38,26 @@ router.get("/", async function (req, res) {
     res.send(e);
   });
 });
+function invoiceCall() {
+  console.log("\n\n\ninside invoice call function \n\n\n");
+  $("#result").html("Loading...");
+  $.get("/api_call/invoice", function (data) {
+    // Save the data to the invoiceData variable
+    invoiceData = data.QueryResponse.Invoice[0];
 
-module.exports = router;
+    // Display the data on the HTML page (optional)
+    $("#result").html(JSON.stringify(invoiceData, null, 2));
+
+    // You can now use the invoiceData variable elsewhere in your code
+    // For example, you can access specific properties like invoiceData.DocNumber, invoiceData.CustomerRef, etc.
+
+    console.log(
+      "result received for invoice : " + JSON.stringify(invoiceData, null, 2)
+    );
+
+    // Call the customerCall function here to use the invoiceData
+    customerCall(invoiceData.CustomerRef.value);
+  });
+}
+
+module.exports = { router, invoiceCall };
