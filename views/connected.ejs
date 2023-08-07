@@ -3,9 +3,9 @@
   <title>OAuth2 Sample App - Intuit</title>
   <link rel="stylesheet" type="text/css" href="style.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
-  <script src="/invoiceCall.js"></script>
 
   <script>
+    
     if(window.opener) {
       window.opener.location.href = '/connected'
       window.close()
@@ -69,8 +69,9 @@
 
   }
   
+
   let boardData = [], no_of_items = 0;
-  async function getBoardData() {
+async function getBoardData() {
   $("#boardDataResult").html('Loading...');
   // Make a GET request to the new route on your server to get board data
   try {
@@ -78,41 +79,106 @@
     const data = await fetch("api_call/get_board_data");
     const jsonData = await data.json();
 
-    boardData = jsonData;
-    no_of_items = jsonData.length;
-    
+    // Extract the boardId and boardData from the response
+    const { boardId, boardData: receivedBoardData } = jsonData;
+
+    boardData = receivedBoardData;
+    // no_of_items = receivedBoardData.length;
+
     // Display the data on the HTML page
-    $("#boardDataResult").html(boardData);
+    $("#boardDataResult").html(JSON.stringify(boardData, null, 2));
+
+    let i = 0;
+    let board_id = boardData.boardId;
+    boardData = boardData.boardData;
+    no_of_items = boardData.length;
+    console.log(boardData);
+
+    while (no_of_items > 0) {
+      const docNum = boardData[i].name;
+
+      await invoiceCall(docNum);
+      console.log(i + 1);
+      invoiceData = JSON.stringify(invoiceData, null, 2);
+      custData = JSON.stringify(custData, null, 2);
+      invoiceData = JSON.parse(invoiceData);
+      custData = JSON.parse(custData);
+      console.log("\n\n\ninvoice Data : ", invoiceData);
+      console.log("\n\nCustomer Data : ", custData);
+
+      itemId = boardData[i].id;
+      col0_id =  boardData[i].column_values[0].id;
+      col1_id =  boardData[i].column_values[1].id;
+      col2_id =  boardData[i].column_values[2].id;
+      col3_id =  boardData[i].column_values[3].id;
+      col4_id =  boardData[i].column_values[4].id;
+      col5_id =  boardData[i].column_values[5].id;
+      col6_id =  boardData[i].column_values[6].id;
+      col7_id =  boardData[i].column_values[7].id;
+      col8_id =  boardData[i].column_values[8].id;
+      col9_id =  boardData[i].column_values[9].id;
+      
+
+      
+      
+      col0_val = custData.Customer.DisplayName;
+      col1_val = invoiceData.DueDate.substr(0, 10);
+      col2_val = invoiceData.Balance;
+      col3_val = invoiceData.SalesTermRef.name;
+      col4_val = invoiceData.BillAddr.Line1 + "  " +invoiceData.BillAddr.City + "  " +  invoiceData.BillAddr.Country;
+      col5_val = custData.Customer.PrimaryEmailAddr.Address;
+      col6_val = invoiceData.Line[1].Amount;
+      col7_val = invoiceData.TxnTaxDetail.TotalTax;
+      col8_val = invoiceData.MetaData.CreateTime.substr(0, 10);
+      col9_val = invoiceData.MetaData.LastUpdatedTime.substr(0, 10);
+
+      const postData = {
+        boardId: board_id,
+        itemId: itemId,
+        columns: [
+          { id: col0_id, value: col0_val },
+          { id: col1_id, value: col1_val },
+          { id: col2_id, value: col2_val },
+          { id: col3_id, value: col3_val },
+          { id: col4_id, value: col4_val },
+          { id: col5_id, value: col5_val },
+          { id: col6_id, value: col6_val },
+          { id: col7_id, value: col7_val },
+          { id: col8_id, value: col8_val },
+          { id: col9_id, value: col9_val },
+        ],
+      };
+      try {
+        
+        const response = await fetch("/api_call/updateCol", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(postData),
+        });
+
+        if (response.ok) {
+          const responseData = await response.json();
+          console.log("Response from server:", responseData);
+        } else {
+          console.error("Error from server:", response.statusText);
+        }
+
+   
+  } catch (error) {
+    console.error("Error while getting invoice data:", error);
+    
+  }
+      no_of_items--;
+      i++;
+    }
   } catch (error) {
     console.error("Error while getting board data:", error);
     $("#boardDataResult").html('Error: ' + JSON.stringify(error));
   }
-
-  console.log("all board data : " , boardData);
-  let i = 0;
-while (no_of_items > 0) {
-  const docNum = boardData[i].name;
-
-  await invoiceCall(docNum);
-  console.log(i + 1);
-  invoiceData = JSON.stringify(invoiceData, null, 2);
-  custData = JSON.stringify(custData, null, 2);
-  console.log("\n\n\ninvoice Data : ", invoiceData);
-  console.log("\n\nCustomer Data : ",custData);
-  await monday
-  .api(
-    `mutation {change_multiple_column_values(item_id:${boardData[i].itemId}, board_id:${boardId}, column_values: \"{\\\"${extractedData[i].columns[2].id}\\\": \\\"${myStatus}\\\", \\\"${extractedData[i].columns[3].id}\\\" : \\\"${dateTime}\\\"} \") {id}}`
-  )
-  .then((res) => {
-    console.log("Data inserted: " + JSON.stringify(res.data));
-  });  
-  no_of_items--;
-  i++;
-}
-
-
-}
-  </script>
+}  
+</script>
 </head>
 <body>
   <a href="/">Home</a>
