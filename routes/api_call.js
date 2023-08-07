@@ -9,6 +9,9 @@ const { getBoardData } = require("../app.cjs");
 /** /api_call **/
 router.get("/", function (req, res) {
   var token = tools.getToken(req.session);
+  console.log("token in api_call : ", token);
+  console.log("\n\n\nrequest URL: ", req.headers.host + req.url); // Modified line to get the URL from the request headers
+
   if (!token) return res.json({ error: "Not authorized" });
   if (!req.session.realmId)
     return res.json({
@@ -119,7 +122,7 @@ router.get("/get_board_data", async function (req, res) {
     }
 
     // Call the function to get board data using the Monday API
-    const boardData = await getBoardData(boardId);
+    const boardData = await getBoardData(boardId, res);
 
     // Send the board data as JSON response
     res.json(boardData);
@@ -130,6 +133,7 @@ router.get("/get_board_data", async function (req, res) {
 });
 
 router.get("/invoice", function (req, res) {
+  console.log("inside api call's invoice call function");
   var token = tools.getToken(req.session);
   if (!token) return res.json({ error: "Not authorized" });
   if (!req.session.realmId)
@@ -137,13 +141,17 @@ router.get("/invoice", function (req, res) {
       error:
         "No realm ID.  QBO calls only work if the accounting scope was passed!",
     });
+  var docNum = req.query.docNum;
+  console.log("Received docNum: ", docNum);
   console.log("\n\n\nmaking invoice api call \n\n\n");
   // Set up API call (with OAuth2 accessToken)
   var url =
     config.api_uri +
     req.session.realmId +
-    "/query?query=select * from Invoice where DocNumber = '1046'&minorversion=40" +
-    console.log("Making API call to: " + url);
+    "/query?query=select * from Invoice where DocNumber = '" +
+    docNum +
+    "'&minorversion=40";
+  console.log("Making API call to: " + url);
 
   var requestObj = {
     url: url,
@@ -173,7 +181,7 @@ router.get("/invoice", function (req, res) {
   });
 });
 
-router.get("/customer:customerRefValue", function (req, res) {
+router.get("/customer", function (req, res) {
   var token = tools.getToken(req.session);
   if (!token) return res.json({ error: "Not authorized" });
   if (!req.session.realmId)
@@ -184,8 +192,8 @@ router.get("/customer:customerRefValue", function (req, res) {
   console.log("\n\n\nmaking customer api call \n\n\n");
   // Set up API call (with OAuth2 accessToken)
 
-  var customerRefValue = req.params.customerRefValue;
-
+  var customerRefValue = req.query.customerRefValue;
+  console.log("Received docNum: ", customerRefValue);
   console.log(
     "\n\n\nmaking customer api call for CustomerRef.value: " +
       customerRefValue +
@@ -228,5 +236,51 @@ router.get("/customer:customerRefValue", function (req, res) {
     );
   });
 });
+
+// router.get("/connected/invoiceCall", function (req, res) {
+//   console.log("inside app.cjs' call's invoice call function");
+//   // Assuming you have some authentication/authorization logic here to validate the request
+//   var token = tools.getToken(req.session);
+//   console.log("\n\n\ntoken : ", token);
+//   if (!token) return res.json({ error: "Not authorized" });
+//   if (!req.session.realmId)
+//     return res.json({
+//       error:
+//         "No realm ID.  QBO calls only work if the accounting scope was passed!",
+//     });
+//   console.log("\n\n\nmaking invoice api call \n\n\n");
+//   // Set up API call (with OAuth2 accessToken)
+//   var url =
+//     config.api_uri +
+//     req.session.realmId +
+//     "/query?query=select * from Invoice where DocNumber = '1046'&minorversion=40" +
+//     console.log("Making API call to: " + url);
+
+//   var requestObj = {
+//     url: url,
+//     headers: {
+//       Authorization: "Bearer " + token.accessToken,
+//       Accept: "application/json",
+//     },
+//   };
+//   // Make API call
+//   request(requestObj, function (err, response) {
+//     // Check if 401 response was returned - refresh tokens if so!
+//     tools.checkForUnauthorized(req, requestObj, err, response).then(
+//       function ({ err, response }) {
+//         if (err || response.statusCode != 200) {
+//           return res.json({ error: err, statusCode: response.statusCode });
+//         }
+
+//         // API Call was a success!
+//         res.json(JSON.parse(response.body));
+//       },
+//       function (err) {
+//         console.log(err);
+//         return res.json(err);
+//       }
+//     );
+//   });
+// });
 
 module.exports = router;

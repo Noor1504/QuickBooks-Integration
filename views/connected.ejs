@@ -3,6 +3,8 @@
   <title>OAuth2 Sample App - Intuit</title>
   <link rel="stylesheet" type="text/css" href="style.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+  <script src="/invoiceCall.js"></script>
+
   <script>
     if(window.opener) {
       window.opener.location.href = '/connected'
@@ -28,58 +30,88 @@
       })
     }
     
-    var invoiceData = {};
-    var custData = {};
-    function customerCall(customerRefValue)  {
-      console.log("CustomerRef.value in customerCall: " + customerRefValue);
+    var invoiceData = [];
+    var custData = [];
+    async function customerCall(customerRefValue) {
+  $("#result").html('Loading...');
+  try {
+    // Make a GET request to the new route on your server to get customer data
+    const data = await $.get("/api_call/customer", { customerRefValue: customerRefValue });
 
-      $("#result").html('Loading...')
-      $.get("/api_call/customer"+customerRefValue, function(data) {
-        custData = data;
+    // Save the data to the custData variable (global variable)
+    custData = data;
 
-      // Display the data on the HTML page (optional)
-      $("#result").html(JSON.stringify(custData, null, 2));
-      console.log(custData);
-      })
-      
-    }
+    // Display the data on the HTML page (optional)
+    $("#result").html(JSON.stringify(custData, null, 2));
+  } catch (error) {
+    console.error("Error while getting customer data:", error);
+    $("#result").html('Error: ' + JSON.stringify(error));
+  }
+}
+    async function invoiceCall(docNum) {
+    $("#result").html('Loading...');
+    try {
+    // Make a GET request to the new route on your server to get invoice data
+    const data = await $.get("/api_call/invoice", { docNum: docNum });
 
-  //   function invoiceCall() {
-  //   console.log("\n\n\ninside invoice call function \n\n\n");
-  //   $("#result").html('Loading...');
-  //   $.get("/api_call/invoice", function(data) {
-  //     // Save the data to the invoiceData variable
-  //     invoiceData = data.QueryResponse.Invoice[0];
+    // Save the data to the invoiceData variable
+    invoiceData = data.QueryResponse.Invoice[0];
 
-  //     // Display the data on the HTML page (optional)
-  //     $("#result").html(JSON.stringify(invoiceData, null, 2));
+    // Display the data on the HTML page (optional)
+    $("#result").html(JSON.stringify(invoiceData, null, 2));
 
-  //     // You can now use the invoiceData variable elsewhere in your code
-  //     // For example, you can access specific properties like invoiceData.DocNumber, invoiceData.CustomerRef, etc.
+    // Call the customerCall function here to use the invoiceData
+    await customerCall(invoiceData.CustomerRef.value);
+  } catch (error) {
+    console.error("Error while getting invoice data:", error);
+    $("#result").html('Error: ' + JSON.stringify(error));
+  }
 
-  //     console.log("result received for invoice : " + JSON.stringify(invoiceData, null, 2));
-
-  //     // Call the customerCall function here to use the invoiceData
-  //     customerCall(invoiceData.CustomerRef.value);
-  //   });
-
-  // }
+  }
   
-
-  function getBoardData() {
-    console.log("inside get board data")
+  let boardData = [], no_of_items = 0;
+  async function getBoardData() {
   $("#boardDataResult").html('Loading...');
   // Make a GET request to the new route on your server to get board data
-  $.get("api_call/get_board_data", function (data) {
+  try {
+    // Make a GET request to the new route on your server to get board data
+    const data = await fetch("api_call/get_board_data");
+    const jsonData = await data.json();
+
+    boardData = jsonData;
+    no_of_items = jsonData.length;
+    
     // Display the data on the HTML page
-    $("#boardDataResult").html(JSON.stringify(data, null, 2));
-  }).fail(function (error) {
+    $("#boardDataResult").html(boardData);
+  } catch (error) {
     console.error("Error while getting board data:", error);
     $("#boardDataResult").html('Error: ' + JSON.stringify(error));
-  });
+  }
+
+  console.log("all board data : " , boardData);
+  let i = 0;
+while (no_of_items > 0) {
+  const docNum = boardData[i].name;
+
+  await invoiceCall(docNum);
+  console.log(i + 1);
+  invoiceData = JSON.stringify(invoiceData, null, 2);
+  custData = JSON.stringify(custData, null, 2);
+  console.log("\n\n\ninvoice Data : ", invoiceData);
+  console.log("\n\nCustomer Data : ",custData);
+  await monday
+  .api(
+    `mutation {change_multiple_column_values(item_id:${boardData[i].itemId}, board_id:${boardId}, column_values: \"{\\\"${extractedData[i].columns[2].id}\\\": \\\"${myStatus}\\\", \\\"${extractedData[i].columns[3].id}\\\" : \\\"${dateTime}\\\"} \") {id}}`
+  )
+  .then((res) => {
+    console.log("Data inserted: " + JSON.stringify(res.data));
+  });  
+  no_of_items--;
+  i++;
 }
 
 
+}
   </script>
 </head>
 <body>

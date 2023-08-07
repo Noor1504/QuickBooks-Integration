@@ -23,6 +23,7 @@
     "https": "^1.0.0",
     "jsonwebtoken": "^9.0.1",
     "monday-sdk-js": "^0.4.8",
+    "node-fetch": "^2.6.12",
     "path": "^0.12.7",
     "request": "^2.78.0",
     "rsa-pem-from-mod-exp": "^0.8.4"

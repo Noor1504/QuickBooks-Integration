@@ -3,7 +3,8 @@ const express = require("express");
 const session = require("express-session");
 const mondaySdk = require("monday-sdk-js");
 const fs = require("fs/promises");
-const { invoiceCall } = require("./routes/connected");
+const invoiceCall = require("./invoiceCall.js");
+var tools = require("./tools/tools.js");
 
 const { useState } = require("react");
 const app = express(); // Create the Express app instance
@@ -117,64 +118,64 @@ const createColumn = async (config, boardId) => {
     console.error("Error creating column:", error);
   }
 };
-// Function to get board data using the Monday API
+
 const getBoardData = async (boardId) => {
   console.log("inside getBoardData of app.cjs");
-  monday.setToken(
+  await monday.setToken(
     "eyJhbGciOiJIUzI1NiJ9.eyJ0aWQiOjI3MDc4Nzk2MiwiYWFpIjoxMSwidWlkIjo0NDUwNTExNCwiaWFkIjoiMjAyMy0wNy0yNVQwMToxMToyMS4wMDBaIiwicGVyIjoibWU6d3JpdGUiLCJhY3RpZCI6MTczOTg4NTcsInJnbiI6ImFwc2UyIn0.PxfcBQSPkTagLSX2aVwCEi-I8MZLH7923R8ypdQfusM"
   );
-  await monday
-    .api(`query {boards (ids: ${boardId}) {groups {title id}}}`)
-    .then((res) => {
-      console.log("Groups are: " + JSON.stringify(res.data.boards[0].groups));
-    });
-  let no_of_items = 0;
-  let board_data;
-  let extractedData = [];
-  await monday
-    .api(
+
+  try {
+    const groupsResponse = await monday.api(
+      `query {boards (ids: ${boardId}) {groups {title id}}}`
+    );
+    console.log(
+      "Groups are: " + JSON.stringify(groupsResponse.data.boards[0].groups)
+    );
+
+    const itemsResponse = await monday.api(
       `query { boards(ids: ${boardId}) { items { id, name, column_values { id, text } } } }`
-    )
-    .then((res) => {
-      board_data = res.data.boards[0].items;
-      console.log("Board Data : ", board_data);
+    );
+    const board_data = itemsResponse.data.boards[0].items;
 
-      // Store the extracted data for later use
-      board_data.forEach((item) => {
-        let itemId = item.id;
-        let name = item.name;
-        let columns = [];
-
-        item.column_values.forEach((column) => {
-          columns.push({ id: column.id, value: column.text });
-        });
-
-        extractedData.push({ itemId, name, columns });
-      });
-
-      no_of_items = board_data.length;
-      console.log("No of Items  : ", no_of_items);
+    // Process the data here if needed
+    const extractedData = board_data.map((item) => {
+      const itemId = item.id;
+      const name = item.name;
+      const columns = item.column_values.map((column) => ({
+        id: column.id,
+        value: column.text,
+      }));
+      return { itemId, name, columns };
     });
-  console.log("Extracted Data : ", extractedData);
-
-  let i = 0;
-  while (no_of_items > 0) {
-    const docNum = extractedData[i].name;
-    console.log("DocNum : ", docNum);
-    console.log("calling invoice call from app.cjs");
-    await invoiceCall();
-    console.log("done caling func");
-    // await monday
-    // .api(
-    //   `mutation {change_multiple_column_values(item_id:${extractedData[i].itemId}, board_id:${boardId}, column_values: \"{\\\"${extractedData[i].columns[2].id}\\\": \\\"${myStatus}\\\", \\\"${extractedData[i].columns[3].id}\\\" : \\\"${dateTime}\\\"} \") {id}}`
-    // )
-    // .then((res) => {
-    //   console.log("Data inserted: " + JSON.stringify(res.data));
-    // });
-    no_of_items--;
-    i++;
+    return extractedData;
+  } catch (error) {
+    console.error("Error while retrieving board data:", error);
+    throw error; // Rethrow the error to handle it in the calling function
   }
 };
+
+// console.log("Extracted Data : ", extractedData);
+
+// let i = 0;
+// while (no_of_items > 0) {
+//   const docNum = extractedData[i].name;
+//   console.log("DocNum : ", docNum);
+//   console.log("calling invoice call from app.cjs");
+//   //call invoiceCall here which is located in connected.ejs
+//   await invoiceCall();
+//   console.log("done caling func");
+//   // await monday
+//   // .api(
+//   //   `mutation {change_multiple_column_values(item_id:${extractedData[i].itemId}, board_id:${boardId}, column_values: \"{\\\"${extractedData[i].columns[2].id}\\\": \\\"${myStatus}\\\", \\\"${extractedData[i].columns[3].id}\\\" : \\\"${dateTime}\\\"} \") {id}}`
+//   // )
+//   // .then((res) => {
+//   //   console.log("Data inserted: " + JSON.stringify(res.data));
+//   // });
+//   no_of_items--;
+//   i++;
+// }
+
 (async () => {
   const config = await loadConfig();
   if (!config) {
@@ -244,11 +245,54 @@ const getBoardData = async (boardId) => {
   app.use("/callback", require("./routes/callback.js"));
 
   // Connected - call OpenID and render connected view
-  const connectedRouter = require("./routes/connected.js");
-  app.use("/connected", connectedRouter);
+  app.use("/connected", require("./routes/connected.js"));
+  app.use("/api_call", require("./routes/api_call.js"));
 
-  // Call an example API over OAuth2
-  app.use("/api_call", require("./routes/api_call.js", { config }));
+  // app.get("/connected/invoiceCall", function (req, res) {
+  //   console.log("inside app.cjs' call's invoice call function");
+  //   // Assuming you have some authentication/authorization logic here to validate the request
+  //   var token = tools.getToken(req.session);
+  //   console.log("\n\n\ntoken : ", token);
+  //   if (!token) return res.json({ error: "Not authorized" });
+  //   if (!req.session.realmId)
+  //     return res.json({
+  //       error:
+  //         "No realm ID.  QBO calls only work if the accounting scope was passed!",
+  //     });
+  //   console.log("\n\n\nmaking invoice api call \n\n\n");
+  //   // Set up API call (with OAuth2 accessToken)
+  //   var url =
+  //     config.api_uri +
+  //     req.session.realmId +
+  //     "/query?query=select * from Invoice where DocNumber = '1046'&minorversion=40" +
+  //     console.log("Making API call to: " + url);
+
+  //   var requestObj = {
+  //     url: url,
+  //     headers: {
+  //       Authorization: "Bearer " + token.accessToken,
+  //       Accept: "application/json",
+  //     },
+  //   };
+  //   // Make API call
+  //   request(requestObj, function (err, response) {
+  //     // Check if 401 response was returned - refresh tokens if so!
+  //     tools.checkForUnauthorized(req, requestObj, err, response).then(
+  //       function ({ err, response }) {
+  //         if (err || response.statusCode != 200) {
+  //           return res.json({ error: err, statusCode: response.statusCode });
+  //         }
+
+  //         // API Call was a success!
+  //         res.json(JSON.parse(response.body));
+  //       },
+  //       function (err) {
+  //         console.log(err);
+  //         return res.json(err);
+  //       }
+  //     );
+  //   });
+  // });
   app.listen(3000, function () {
     console.log("Example app listening on port 3000!");
   });
