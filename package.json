@@ -3,29 +3,46 @@
   "version": "1.0.0",
   "type": "commonjs",
   "description": "",
-  "main": "app.js",
+  "main": "app.cjs",
   "scripts": {
     "start": "node app.cjs",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "webpack --config webpack.config.js"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "assert": "^2.0.0",
     "atob": "^2.0.3",
+    "browserify-zlib": "^0.2.0",
     "btoa": "^1.1.2",
-    "client-oauth2": "^4.3.3",
+    "client-oauth2": "^4.2.4",
+    "crypto-browserify": "^3.12.0",
     "csrf": "^3.0.4",
     "ejs": "^3.1.9",
     "expect": "^1.20.2",
     "express": "^4.14.0",
     "express-session": "^1.14.2",
-    "fs": "0.0.1-security",
+    "fs": "^0.0.1-security",
+    "graceful-fs": "^4.2.11",
     "https": "^1.0.0",
+    "https-browserify": "^1.0.0",
     "jsonwebtoken": "^9.0.1",
     "monday-sdk-js": "^0.4.8",
+    "net-browserify": "^0.1.4",
     "node-fetch": "^2.6.12",
     "path": "^0.12.7",
+    "querystring-es3": "^0.2.1",
     "request": "^2.78.0",
-    "rsa-pem-from-mod-exp": "^0.8.4"
+    "rsa-pem-from-mod-exp": "^0.8.4",
+    "stream-browserify": "^3.0.0",
+    "stream-http": "^3.2.0",
+    "timers-browserify": "^2.0.12",
+    "tls-browserify": "^0.2.2",
+    "url": "^0.11.1"
+  },
+  "devDependencies": {
+    "webpack": "^5.88.2",
+    "webpack-cli": "^5.1.4"
   }
 }

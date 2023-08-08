@@ -1,200 +1,166 @@
 <html>
-<head>
-  <title>OAuth2 Sample App - Intuit</title>
-  <link rel="stylesheet" type="text/css" href="style.css">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+  <head>
+    <title>My Quickbooks Integration with Monday.com</title>
+    <link rel="stylesheet" type="text/css" href="style.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
 
-  <script>
-    
-    if(window.opener) {
-      window.opener.location.href = '/connected'
-      window.close()
-    }
-
-    function apiCall() {
-      $("#result").html('Loading...')
-      $.get("/api_call", function(data) {
-        $("#result").html(JSON.stringify(data, null, 2))
-      })
-    }
-    function revokeCall() {
-      $("#result").html('Loading...')
-      $.get("/api_call/revoke", function(data) {
-        $("#result").html(JSON.stringify(data, null, 2))
-      })
-    }
-    function refreshCall() {
-      $("#result").html('Loading...')
-      $.get("/api_call/refresh", function(data) {
-        $("#result").html(JSON.stringify(data, null, 2))
-      })
-    }
-    
-    var invoiceData = [];
-    var custData = [];
-    async function customerCall(customerRefValue) {
-  $("#result").html('Loading...');
-  try {
-    // Make a GET request to the new route on your server to get customer data
-    const data = await $.get("/api_call/customer", { customerRefValue: customerRefValue });
-
-    // Save the data to the custData variable (global variable)
-    custData = data;
-
-    // Display the data on the HTML page (optional)
-    $("#result").html(JSON.stringify(custData, null, 2));
-  } catch (error) {
-    console.error("Error while getting customer data:", error);
-    $("#result").html('Error: ' + JSON.stringify(error));
-  }
-}
-    async function invoiceCall(docNum) {
-    $("#result").html('Loading...');
-    try {
-    // Make a GET request to the new route on your server to get invoice data
-    const data = await $.get("/api_call/invoice", { docNum: docNum });
-
-    // Save the data to the invoiceData variable
-    invoiceData = data.QueryResponse.Invoice[0];
-
-    // Display the data on the HTML page (optional)
-    $("#result").html(JSON.stringify(invoiceData, null, 2));
-
-    // Call the customerCall function here to use the invoiceData
-    await customerCall(invoiceData.CustomerRef.value);
-  } catch (error) {
-    console.error("Error while getting invoice data:", error);
-    $("#result").html('Error: ' + JSON.stringify(error));
-  }
-
-  }
-  
-
-  let boardData = [], no_of_items = 0;
-async function getBoardData() {
-  $("#boardDataResult").html('Loading...');
-  // Make a GET request to the new route on your server to get board data
-  try {
-    // Make a GET request to the new route on your server to get board data
-    const data = await fetch("api_call/get_board_data");
-    const jsonData = await data.json();
-
-    // Extract the boardId and boardData from the response
-    const { boardId, boardData: receivedBoardData } = jsonData;
-
-    boardData = receivedBoardData;
-    // no_of_items = receivedBoardData.length;
-
-    // Display the data on the HTML page
-    $("#boardDataResult").html(JSON.stringify(boardData, null, 2));
-
-    let i = 0;
-    let board_id = boardData.boardId;
-    boardData = boardData.boardData;
-    no_of_items = boardData.length;
-    console.log(boardData);
-
-    while (no_of_items > 0) {
-      const docNum = boardData[i].name;
-
-      await invoiceCall(docNum);
-      console.log(i + 1);
-      invoiceData = JSON.stringify(invoiceData, null, 2);
-      custData = JSON.stringify(custData, null, 2);
-      invoiceData = JSON.parse(invoiceData);
-      custData = JSON.parse(custData);
-      console.log("\n\n\ninvoice Data : ", invoiceData);
-      console.log("\n\nCustomer Data : ", custData);
-
-      itemId = boardData[i].id;
-      col0_id =  boardData[i].column_values[0].id;
-      col1_id =  boardData[i].column_values[1].id;
-      col2_id =  boardData[i].column_values[2].id;
-      col3_id =  boardData[i].column_values[3].id;
-      col4_id =  boardData[i].column_values[4].id;
-      col5_id =  boardData[i].column_values[5].id;
-      col6_id =  boardData[i].column_values[6].id;
-      col7_id =  boardData[i].column_values[7].id;
-      col8_id =  boardData[i].column_values[8].id;
-      col9_id =  boardData[i].column_values[9].id;
-      
-
-      
-      
-      col0_val = custData.Customer.DisplayName;
-      col1_val = invoiceData.DueDate.substr(0, 10);
-      col2_val = invoiceData.Balance;
-      col3_val = invoiceData.SalesTermRef.name;
-      col4_val = invoiceData.BillAddr.Line1 + "  " +invoiceData.BillAddr.City + "  " +  invoiceData.BillAddr.Country;
-      col5_val = custData.Customer.PrimaryEmailAddr.Address;
-      col6_val = invoiceData.Line[1].Amount;
-      col7_val = invoiceData.TxnTaxDetail.TotalTax;
-      col8_val = invoiceData.MetaData.CreateTime.substr(0, 10);
-      col9_val = invoiceData.MetaData.LastUpdatedTime.substr(0, 10);
-
-      const postData = {
-        boardId: board_id,
-        itemId: itemId,
-        columns: [
-          { id: col0_id, value: col0_val },
-          { id: col1_id, value: col1_val },
-          { id: col2_id, value: col2_val },
-          { id: col3_id, value: col3_val },
-          { id: col4_id, value: col4_val },
-          { id: col5_id, value: col5_val },
-          { id: col6_id, value: col6_val },
-          { id: col7_id, value: col7_val },
-          { id: col8_id, value: col8_val },
-          { id: col9_id, value: col9_val },
-        ],
-      };
-      try {
-        
-        const response = await fetch("/api_call/updateCol", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(postData),
+    <script>
+      function revokeCall() {
+        $("#result").html("Loading...");
+        $.get("/api_call/revoke", function (data) {
+          $("#result").html(JSON.stringify(data, null, 2));
         });
+      }
+      function refreshCall() {
+        $("#result").html("Loading...");
+        $.get("/api_call/refresh", function (data) {
+          $("#result").html(JSON.stringify(data, null, 2));
+        });
+      }
 
-        if (response.ok) {
-          const responseData = await response.json();
-          console.log("Response from server:", responseData);
-        } else {
-          console.error("Error from server:", response.statusText);
+      var invoiceData = [];
+      var custData = [];
+      async function customerCall(customerRefValue) {
+        try {
+          // Make a GET request to the new route on your server to get customer data
+          const data = await $.get("/api_call/customer", {
+            customerRefValue: customerRefValue,
+          });
+
+          // Save the data to the custData variable (global variable)
+          custData = data;
+        } catch (error) {}
+      }
+      async function invoiceCall(docNum) {
+        try {
+          // Make a GET request to the new route on your server to get invoice data
+          const data = await $.get("/api_call/invoice", { docNum: docNum });
+
+          // Save the data to the invoiceData variable
+          invoiceData = data.QueryResponse.Invoice[0];
+
+          // Call the customerCall function here to use the invoiceData
+          await customerCall(invoiceData.CustomerRef.value);
+        } catch (error) {}
+      }
+
+      let boardData = [],
+        no_of_items = 0;
+      async function getBoardData() {
+        $("#result").html("Working...");
+        // Make a GET request to the new route on your server to get board data
+        try {
+          // Make a GET request to the new route on your server to get board data
+          const data = await fetch("api_call/get_board_data");
+          const jsonData = await data.json();
+
+          // Extract the boardId and boardData from the response
+          const { boardId, boardData: receivedBoardData } = jsonData;
+
+          boardData = receivedBoardData;
+
+          let i = 0;
+          let board_id = boardData.boardId;
+          boardData = boardData.boardData;
+          no_of_items = boardData.length;
+          console.log(boardData);
+
+          while (no_of_items > 0) {
+            const docNum = boardData[i].name;
+
+            await invoiceCall(docNum);
+            console.log(i + 1);
+            invoiceData = JSON.stringify(invoiceData, null, 2);
+            custData = JSON.stringify(custData, null, 2);
+            invoiceData = JSON.parse(invoiceData);
+            custData = JSON.parse(custData);
+
+            itemId = boardData[i].id;
+            col0_id = boardData[i].column_values[0].id;
+            col1_id = boardData[i].column_values[1].id;
+            col2_id = boardData[i].column_values[2].id;
+            col3_id = boardData[i].column_values[3].id;
+            col4_id = boardData[i].column_values[4].id;
+            col5_id = boardData[i].column_values[5].id;
+            col6_id = boardData[i].column_values[6].id;
+            col7_id = boardData[i].column_values[7].id;
+            col8_id = boardData[i].column_values[8].id;
+            col9_id = boardData[i].column_values[9].id;
+
+            col0_val = custData.Customer.DisplayName;
+            col1_val = invoiceData.Balance;
+            col8_val = invoiceData.DueDate.substr(0, 10);
+            col2_val = invoiceData.SalesTermRef
+              ? invoiceData.SalesTermRef.name
+              : "NIL";
+            col5_val =
+              invoiceData.BillAddr.Line1 +
+              "  " +
+              invoiceData.BillAddr.City +
+              "  " +
+              invoiceData.BillAddr.Country;
+            col3_val = custData.Customer.PrimaryEmailAddr.Address;
+            col4_val = invoiceData.Line[1].Amount;
+            col6_val = invoiceData.TxnTaxDetail.TotalTax;
+            col7_val = invoiceData.MetaData.CreateTime.substr(0, 10);
+            col9_val = invoiceData.MetaData.LastUpdatedTime.substr(0, 10);
+
+            const postData = {
+              boardId: board_id,
+              itemId: itemId,
+              columns: [
+                { id: col0_id, value: col0_val },
+                { id: col1_id, value: col1_val },
+                { id: col2_id, value: col2_val },
+                { id: col3_id, value: col3_val },
+                { id: col4_id, value: col4_val },
+                { id: col5_id, value: col5_val },
+                { id: col6_id, value: col6_val },
+                { id: col7_id, value: col7_val },
+                { id: col8_id, value: col8_val },
+                { id: col9_id, value: col9_val },
+              ],
+            };
+            try {
+              const response = await fetch("/api_call/updateCol", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify(postData),
+              });
+
+              if (response.ok) {
+                const responseData = await response.json();
+                console.log("Response from server:", responseData);
+              } else {
+                console.error("Error from server:", response.statusText);
+              }
+            } catch (error) {
+              console.error("Error while getting invoice data:", error);
+            }
+            no_of_items--;
+            i++;
+          }
+          $("#result").html("Board Data updated Successfully");
+        } catch (error) {
+          console.error("Error while getting board data:", error);
+          $("#boardDataResult").html("Error: " + JSON.stringify(error));
         }
+      }
+    </script>
+  </head>
+  <body>
+    <a href="/">Home</a>
+    <h3>Connected!</h3>
+    <p>Welcome<% if (locals.givenName) { %>, <%= locals.givenName %><% } %>!</p>
+    <div>
+      <button onclick="refreshCall()">Refresh Token Call</button>
+      <button onclick="revokeCall()">Revoke Token Call</button>
+      <button onclick="getBoardData()">Get Board Data</button>
+      <br /><br />
+    </div>
 
-   
-  } catch (error) {
-    console.error("Error while getting invoice data:", error);
-    
-  }
-      no_of_items--;
-      i++;
-    }
-  } catch (error) {
-    console.error("Error while getting board data:", error);
-    $("#boardDataResult").html('Error: ' + JSON.stringify(error));
-  }
-}  
-</script>
-</head>
-<body>
-  <a href="/">Home</a>
-  <h3>Connected!</h3>
-  <p>Welcome<% if (locals.givenName) { %>, <%= locals.givenName %><% } %>!</p>
-  <p>Would you like to make a sample API call?</p>
-  <div>
-    <button onclick="apiCall()">QuickBooks API Call</button>
-    <button onclick="invoiceCall()">Invoice Call</button>
-    <button onclick="refreshCall()">Refresh Token Call</button>
-    <button onclick="revokeCall()">Revoke Token Call</button>
-    <button onclick="getBoardData()">Get Board Data</button>
-<br><br>
-<div><code id="boardDataResult"></code></div>
-
-    <br><br>
     <div><code id="result"></code></div>
-</body>
+  </body>
 </html>

@@ -3,10 +3,11 @@ const express = require("express");
 const session = require("express-session");
 const mondaySdk = require("monday-sdk-js");
 const fs = require("fs/promises");
-var tools = require("./tools/tools.js");
+const myFs = require("fs");
+const bodyParser = require("body-parser");
 
-const { useState } = require("react");
-const app = express(); // Create the Express app instance
+const app = express();
+app.use(bodyParser.urlencoded({ extended: true }));
 const sessionMiddleware = session({
   secret: "secret",
   resave: false,
@@ -35,80 +36,109 @@ const saveBoardId = async (config, boardId) => {
   await fs.writeFile(configPath, JSON.stringify(config, null, 2), "utf8");
   console.log("Config updated and saved successfully.");
 };
+// Function to check if a column with the given title exists in the board's columns
+const doesColumnExist = (columns, columnTitle) => {
+  return columns.some((column) => column.title === columnTitle);
+};
 // Function to create a column using the Monday API
 const createColumn = async (config, boardId) => {
   try {
-    await monday
-      .api(
-        `mutation{ create_column(board_id: ${boardId}, title:\"Customer Name\", description: \"This is my customer names column\", column_type:text) {id title description}}`
-      )
-      .then((res) => {
-        console.log(JSON.stringify(res));
-      });
-    await monday
-      .api(
-        `mutation{ create_column(board_id: ${boardId}, title:\"Due Date\", description: \"This is my due date column\", column_type:date) {id title description}}`
-      )
-      .then((res) => {
-        console.log(JSON.stringify(res));
-      });
-    await monday
-      .api(
-        `mutation{ create_column(board_id: ${boardId}, title:\"Balance Due\", description: \"This is my balance due column\", column_type:numbers) {id title description}}`
-      )
-      .then((res) => {
-        console.log(JSON.stringify(res));
-      });
-    await monday
-      .api(
-        `mutation{ create_column(board_id: ${boardId}, title:\"Sales Terms\", description: \"This is my sales terms column\", column_type:text) {id title description}}`
-      )
-      .then((res) => {
-        console.log(JSON.stringify(res));
-      });
-    await monday
-      .api(
-        `mutation{ create_column(board_id: ${boardId}, title:\"Email\", description: \"This is my emails column\", column_type:text) {id title description}}`
-      )
-      .then((res) => {
-        console.log(JSON.stringify(res));
-      });
-    await monday
-      .api(
-        `mutation{ create_column(board_id: ${boardId}, title:\"Address\", description: \"This is my address column\", column_type:text) {id title description}}`
-      )
-      .then((res) => {
-        console.log(JSON.stringify(res));
-      });
-    await monday
-      .api(
-        `mutation{ create_column(board_id: ${boardId}, title:\"SubTotal\", description: \"This is my subtotal column\", column_type:numbers) {id title description}}`
-      )
-      .then((res) => {
-        console.log(JSON.stringify(res));
-      });
-    await monday
-      .api(
-        `mutation{ create_column(board_id: ${boardId}, title:\"Sales Tax\", description: \"This is my sales tax column\", column_type:numbers) {id title description}}`
-      )
-      .then((res) => {
-        console.log(JSON.stringify(res));
-      });
-    await monday
-      .api(
-        `mutation{ create_column(board_id: ${boardId}, title:\"Creation Date\", description: \"This is my creation date column\", column_type:date) {id title description}}`
-      )
-      .then((res) => {
-        console.log(JSON.stringify(res));
-      });
-    await monday
-      .api(
-        `mutation{ create_column(board_id: ${boardId}, title:\"Updated Date\", description: \"This is my updated date column\", column_type:date) {id title description}}`
-      )
-      .then((res) => {
-        console.log(JSON.stringify(res));
-        saveBoardId(config, boardId);
-      });
+    const existingColumnsResponse = await monday.api(
+      `query {
+        boards(ids: ${boardId}) {
+          columns {
+            id
+            title
+          }
+        }
+      }`
+    );
+
+    const existingColumns = existingColumnsResponse.data.boards[0].columns;
+
+    const columnsToCreate = [
+      // Define your columns to create here
+      {
+        title: "Customer Name",
+        description: "This is my customer names column",
+        column_type: "text",
+      },
+      {
+        title: "Due Date",
+        description: "This is my due date column",
+        column_type: "date",
+      },
+      {
+        title: "Balance Due",
+        description: "This is my balance due column",
+        column_type: "numbers",
+      },
+      {
+        title: "Sales Terms",
+        description: "This is my sales terms column",
+        column_type: "text",
+      },
+      {
+        title: "Email Address",
+        description: "This is my emails column",
+        column_type: "text",
+      },
+      {
+        title: "Address",
+        description: "This is my address column",
+        column_type: "text",
+      },
+      {
+        title: "SubTotal",
+        description: "This is my subtotal column",
+        column_type: "numbers",
+      },
+      {
+        title: "Sales Tax",
+        description: "This is my sales tax column",
+        column_type: "numbers",
+      },
+      {
+        title: "Creation Date",
+        description: "This is my creation date column",
+        column_type: "date",
+      },
+      {
+        title: "Updated Date",
+        description: "This is my updated date column",
+        column_type: "date",
+      },
+    ];
+
+    for (const columnData of columnsToCreate) {
+      const columnTitle = columnData.title;
+
+      // Check if the column with the same title already exists
+      if (doesColumnExist(existingColumns, columnTitle)) {
+        console.log(
+          `Column '${columnTitle}' already exists. Skipping creation.`
+        );
+        continue;
+      }
+
+      const createColumnResponse = await monday.api(
+        `mutation {
+          create_column(
+            board_id: ${boardId},
+            title: "${columnTitle}",
+            description: "${columnData.description}",
+            column_type: ${columnData.column_type}
+          ) {
+            id
+            title
+            description
+          }
+        }`
+      );
+
+      console.log(JSON.stringify(createColumnResponse));
+    }
+    saveBoardId(config, boardId);
   } catch (error) {
     console.error("Error creating column:", error);
   }
@@ -147,46 +177,88 @@ const getBoardData = async (boardId, res) => {
   app.use(
     session({ secret: "secret", resave: "false", saveUninitialized: "false" })
   );
+  app.post("/submit", async function (req, res) {
+    console.log("\n\n\ninside /submit");
+    const accessToken = req.body.accessToken;
+    monday.setToken(accessToken);
+    monday
+      .api(`query{boards (limit:10) {id name} }`)
+      .then((apiResponse) => {
+        console.log("API Response:", apiResponse);
+        const boards = apiResponse.data.boards;
+        console.log("all boards : ", boards);
 
+        // Render the selectBoard.ejs template with the fetched boards data
+        res.render("selectBoard.ejs", { boards: boards });
+      })
+      .catch((error) => {
+        console.error("API Error:", error);
+        // Handle the error and send an appropriate response
+        res.status(500).send("Error fetching boards");
+      });
+    // res.render("signIn", config);
+
+    // res.redirect("/"); // Redirect back to the main page
+  });
+  app.post("/boardSelected", async function (req, res) {
+    console.log("\n\n\ninside /boardSelected");
+    const inputName = req.body.selectedBoard;
+    const allBoardsJSON = req.body.allBoards;
+    const boards = JSON.parse(allBoardsJSON);
+    console.log("\n\n\n\ninput board : ", inputName);
+    console.log("\n\n\nboards : ", boards);
+    for (let i = 0; i < boards.length; i++) {
+      const board = boards[i];
+      if (board.id === inputName) {
+        req.session.boardId = board.id; // Store the boardId in the session
+        console.log("Found board ID:", req.session.boardId);
+        createColumn(config, req.session.boardId);
+        break;
+      }
+    }
+
+    if (!req.session.boardId) {
+      console.log("Board not found");
+    }
+    res.render("quickBooksInputs", config);
+  });
+  app.get("/loggedIn", async function (req, res) {
+    console.log("\n\n inside loggedIn function ");
+    res.render("connect", config);
+  });
+  app.get("/connected", async function (req, res) {
+    console.log("\n\n inside connected function ");
+
+    res.render("connected", config);
+  });
   // Initial view - loads Connect To QuickBooks Button
   app.get("/", async function (req, res) {
-    // monday.listen("context", () => {
-    //   console.log("monday is listening");
-    // });
-    // const storedBoardId = req.session.boardId || "null";
-    // console.log("stored board id : ", storedBoardId);
-    // config.boardId = storedBoardId;
-    // console.log("config.boardid : ", config.boardId);
     if (req.session.boardId) {
       console.log("Found board ID:", req.session.boardId);
     }
-    monday.setToken(
-      "eyJhbGciOiJIUzI1NiJ9.eyJ0aWQiOjI3MjU4Njk1MCwiYWFpIjoxMSwidWlkIjo0NDUwNTExNCwiaWFkIjoiMjAyMy0wOC0wMlQxMjoyNjo0Ni4wMDBaIiwicGVyIjoibWU6d3JpdGUiLCJhY3RpZCI6MTczOTg4NTcsInJnbiI6ImFwc2UyIn0.MR-bgaSU21ZrzXf3DzD6I8qieHcd-czG9iO0atQrSVw"
-    );
-    const inputName = "QuickBooks"; // Replace with your desired board name
 
-    monday.api(`query{boards (limit:10) {id name} }`).then((res) => {
-      console.log("API Response:", res);
-      const boards = res.data.boards;
-      console.log("all boards : ", boards);
-
-      for (let i = 0; i < boards.length; i++) {
-        const board = boards[i];
-        if (board.name === inputName) {
-          req.session.boardId = board.id; // Store the boardId in the session
-          console.log("Found board ID:", req.session.boardId);
-          createColumn(config, req.session.boardId);
-          break;
-        }
-      }
-
-      if (!req.session.boardId) {
-        console.log("Board not found");
-      }
-    });
-
-    res.render("home", config);
+    res.render("inputToken");
   });
+
+  app.post("/submitOAuthSettings", (req, res) => {
+    const clientId = req.body.clientId;
+    const clientSecret = req.body.clientSecret;
+    const redirectUri = req.body.redirectUri;
+
+    // Read the existing content of config.json
+    const configPath = path.join(__dirname, "config.json");
+    const configData = require(configPath);
+
+    // Update the values
+    configData.clientId = clientId;
+    configData.clientSecret = clientSecret;
+    configData.redirectUri = redirectUri;
+
+    // Write the updated data back to the config.json file
+    myFs.writeFileSync(configPath, JSON.stringify(configData, null, 2), "utf8");
+    res.render("signIn", config);
+  });
+
   // Sign In With Intuit, Connect To QuickBooks, or Get App Now
   // These calls will redirect to Intuit's authorization flow
   const signInWithIntuitRouter = require("./routes/sign_in_with_intuit.js");

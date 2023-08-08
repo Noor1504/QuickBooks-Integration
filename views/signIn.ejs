@@ -1,0 +1,36 @@
+<html>
+  <head>
+    <title>OAuth2 Sample App - Intuit</title>
+    <link rel="stylesheet" type="text/css" href="style.css" />
+    <script>
+      if (window.opener) {
+        window.opener.location.href = "/submit#";
+        window.close();
+      }
+    </script>
+  </head>
+  <body>
+    <br /><br /><br />
+
+    <b>Sign In With Intuit</b><br />
+    <a class="imgLink" href="#" onclick="launchPopup('/sign_in_with_intuit')">
+      <img style="height: 40px" src="IntuitSignIn-lg-white@2x.jpg" />
+    </a>
+
+    <script>
+      function launchPopup(path) {
+        var win;
+        var checkConnect;
+        var parameters = "location=1,width=800,height=650";
+        parameters +=
+          ",left=" +
+          (screen.width - 800) / 2 +
+          ",top=" +
+          (screen.height - 650) / 2;
+
+        // Launch Popup
+        win = window.open(path, "connectPopup", parameters);
+      }
+    </script>
+  </body>
+</html>

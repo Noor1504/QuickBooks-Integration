@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>OAuth Settings</title>
+  </head>
+  <body>
+    <h1>OAuth Settings</h1>
+    <form action="/submitOAuthSettings" method="post">
+      <label for="clientId">Client ID:</label>
+      <input type="text" id="clientId" name="clientId" required />
+      <br />
+      <label for="clientSecret">Client Secret:</label>
+      <input type="text" id="clientSecret" name="clientSecret" required />
+      <br />
+      <label for="redirectUri">Redirect URI:</label>
+      <input type="text" id="redirectUri" name="redirectUri" required />
+      <br />
+      <button type="submit">Save Settings</button>
+    </form>
+  </body>
+</html>
