@@ -1,29 +1,83 @@
+<!DOCTYPE html>
 <html>
   <head>
     <title>OAuth2 Sample App - Intuit</title>
-    <link rel="stylesheet" type="text/css" href="style.css" />
+    <!-- Add Bootstrap CSS link -->
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+    />
+    <style>
+      /* Add custom styles */
+      body {
+        background-color: #f5f5f5;
+        font-family: Arial, sans-serif;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        margin: 0;
+      }
+      .cards-container {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+      }
+      .card {
+        width: 300px;
+        padding: 20px;
+        background-color: #fff;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        text-align: center;
+      }
+      .imgLink {
+        display: inline-block;
+        margin-top: 10px;
+      }
+      .imgLink img {
+        height: 40px;
+      }
+      .get-app-button {
+        display: inline-block;
+        padding: 10px;
+        border: 1px solid grey;
+        cursor: pointer;
+        background-color: #00c853;
+        border-color: #00c853;
+      }
+
+      /* Media query for mobile devices */
+      @media (max-width: 768px) {
+        .cards-container {
+          flex-direction: column;
+          align-items: center;
+        }
+        .card {
+          width: 80%; /* Adjust as needed */
+          margin-bottom: 20px;
+        }
+      }
+    </style>
+    <script>
+      if (window.opener) {
+        window.opener.location.href = "/submit#";
+        window.close();
+      }
+    </script>
   </head>
   <body>
-    <b>Connect To QuickBooks</b><br />
-    <a class="imgLink" href="#" onclick="launchPopup('/connect_to_quickbooks')">
-      <img
-        style="height: 40px"
-        src="C2QB_white_btn_lg_default.png"
-        onmouseover="this.src='C2QB_white_btn_lg_hover.png'"
-        onmouseout="this.src='C2QB_white_btn_lg_default.png'"
-      />
-    </a>
-    <br /><br /><br />
-
-    <b>Get App Now</b><br />
-    <a
-      class="imgLink"
-      href="/connect_handler"
-      style="border: 1px solid grey; padding: 10px"
-    >
-      Get App Now
-    </a>
-    <br /><br /><br />
+    <div class="cards-container">
+      <div class="card">
+        <h4>Connect To QuickBooks</h4>
+        <a
+          class="btn btn-primary get-app-button"
+          href="#"
+          onclick="launchPopup('/connect_to_quickbooks')"
+          >Connect to QuickBooks
+        </a>
+      </div>
+    </div>
 
     <script>
       function launchPopup(path) {

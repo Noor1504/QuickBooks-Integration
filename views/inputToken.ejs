@@ -1,10 +1,58 @@
 <!-- views/home.ejs -->
-<form method="post" action="/submit">
-  <label for="accessToken">Access Token:</label>
-  <input type="text" id="accessToken" name="accessToken" required /><br />
-
-  <!-- <label for="boardName">Board Name:</label>
-  <input type="text" id="boardName" name="boardName" required /><br /> -->
-
-  <button type="submit">Submit</button>
-</form>
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>QuickBooks Integration</title>
+    <!-- Add Bootstrap CSS link -->
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+    />
+    <style>
+      /* Add custom styles */
+      body {
+        background-color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        margin: 0;
+      }
+      .form-container {
+        background-color: #f5f5f5; /* Slightly darker background color */
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        max-width: 400px;
+        margin-top: 20px;
+      }
+      .submit-button {
+        background-color: #00c853;
+        border-color: #00c853;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-md-6 form-container">
+          <form method="post" action="/submit">
+            <div class="form-group">
+              <label for="accessToken">Access Token:</label>
+              <input
+                type="text"
+                class="form-control"
+                id="accessToken"
+                name="accessToken"
+                required
+              />
+            </div>
+            <button type="submit" class="btn btn-primary submit-button">
+              Submit
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

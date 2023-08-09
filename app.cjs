@@ -5,6 +5,8 @@ const mondaySdk = require("monday-sdk-js");
 const fs = require("fs/promises");
 const myFs = require("fs");
 const bodyParser = require("body-parser");
+const { config } = require("process");
+var myConfig = require("./config.json");
 
 const app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -41,8 +43,13 @@ const doesColumnExist = (columns, columnTitle) => {
   return columns.some((column) => column.title === columnTitle);
 };
 // Function to create a column using the Monday API
-const createColumn = async (config, boardId) => {
+const createColumn = async (boardId) => {
   try {
+    console.log("\n\n\n create column is working");
+    const accessToken = myConfig.accessToken; // Remove JSON.stringify here
+    console.log("\n\naccessToken in creating column is: ", accessToken);
+    console.log("\n\n\nboardid in config.json : ", myConfig.foundBoardId);
+    await monday.setToken(accessToken);
     const existingColumnsResponse = await monday.api(
       `query {
         boards(ids: ${boardId}) {
@@ -138,7 +145,7 @@ const createColumn = async (config, boardId) => {
 
       console.log(JSON.stringify(createColumnResponse));
     }
-    saveBoardId(config, boardId);
+    // saveBoardId(config, boardId);
   } catch (error) {
     console.error("Error creating column:", error);
   }
@@ -146,9 +153,8 @@ const createColumn = async (config, boardId) => {
 
 const getBoardData = async (boardId, res) => {
   console.log("inside getBoardData of app.cjs");
-  await monday.setToken(
-    "eyJhbGciOiJIUzI1NiJ9.eyJ0aWQiOjI3MjU4Njk1MCwiYWFpIjoxMSwidWlkIjo0NDUwNTExNCwiaWFkIjoiMjAyMy0wOC0wMlQxMjoyNjo0Ni4wMDBaIiwicGVyIjoibWU6d3JpdGUiLCJhY3RpZCI6MTczOTg4NTcsInJnbiI6ImFwc2UyIn0.MR-bgaSU21ZrzXf3DzD6I8qieHcd-czG9iO0atQrSVw"
-  );
+  const accessToken = myConfig.accessToken;
+  await monday.setToken(accessToken);
   const groupsResponse = await monday.api(
     `query {boards (ids: ${boardId}) {groups {title id}}}`
   );
@@ -180,6 +186,13 @@ const getBoardData = async (boardId, res) => {
   app.post("/submit", async function (req, res) {
     console.log("\n\n\ninside /submit");
     const accessToken = req.body.accessToken;
+    // Save the access token to config.json
+    const configPath = path.join(__dirname, "config.json");
+    const configData = require(configPath);
+    configData.accessToken = accessToken;
+
+    // Write the updated data back to the config.json file
+    myFs.writeFileSync(configPath, JSON.stringify(configData, null, 2), "utf8");
     monday.setToken(accessToken);
     monday
       .api(`query{boards (limit:10) {id name} }`)
@@ -212,7 +225,8 @@ const getBoardData = async (boardId, res) => {
       if (board.id === inputName) {
         req.session.boardId = board.id; // Store the boardId in the session
         console.log("Found board ID:", req.session.boardId);
-        createColumn(config, req.session.boardId);
+        saveBoardId(config, req.session.boardId);
+        // createColumn(config, req.session.boardId);
         break;
       }
     }
@@ -223,7 +237,11 @@ const getBoardData = async (boardId, res) => {
     res.render("quickBooksInputs", config);
   });
   app.get("/loggedIn", async function (req, res) {
-    console.log("\n\n inside loggedIn function ");
+    console.log("\n\n inside loggedIn function of app.cjs");
+    res.render("connect", config);
+  });
+  app.get("/submit", async function (req, res) {
+    console.log("\n\n inside get submit function ");
     res.render("connect", config);
   });
   app.get("/connected", async function (req, res) {
@@ -241,6 +259,7 @@ const getBoardData = async (boardId, res) => {
   });
 
   app.post("/submitOAuthSettings", (req, res) => {
+    console.log("\n\ninside submitOAuthSettings");
     const clientId = req.body.clientId;
     const clientSecret = req.body.clientSecret;
     const redirectUri = req.body.redirectUri;
@@ -283,4 +302,5 @@ const getBoardData = async (boardId, res) => {
 
 module.exports = {
   getBoardData,
+  createColumn,
 };

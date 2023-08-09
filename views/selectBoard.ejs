@@ -2,22 +2,108 @@
 <html>
   <head>
     <title>Select Board</title>
+    <!-- Add Bootstrap CSS link -->
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+    />
+    <style>
+      /* Add custom styles */
+      body {
+        background-color: #f5f5f5;
+        font-family: Arial, sans-serif;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        margin: 0;
+      }
+      .container {
+        width: 400px;
+        padding: 20px;
+        background-color: #f5f5f5; /* Dark background color */
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      }
+      h1 {
+        text-align: center;
+        margin-bottom: 20px;
+      }
+      .options-container {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+      .option-bar {
+        padding: 10px;
+        background-color: #f5f5f5; /* Same color as container */
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s, border-color 0.3s;
+        border: 1px solid #d1d1d1; /* Same border color as container */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .option-bar.selected {
+        background-color: #00c853; /* Highlight color for selected option */
+        color: white;
+      }
+      .option-bar:hover {
+        background-color: #e0e0e0; /* Slightly darker on hover */
+      }
+
+      .submit-button {
+        margin-top: 20px;
+        background-color: #00c853;
+        border-color: #00c853;
+        color: white;
+        padding: 12px 20px; /* Adjust padding for a larger button */
+        font-size: 16px;
+        width: 100%; /* Make the submit button span the full width */
+      }
+    </style>
   </head>
   <body>
-    <h1>Select a Board</h1>
-    <form action="/boardSelected" method="post">
-      <select name="selectedBoard">
-        <% boards.forEach(board => { %>
-        <option value="<%= board.id %>"><%= board.name %></option>
-        <% }); %>
-      </select>
-      <!-- Hidden input field to store the JSON representation of boards -->
-      <input
-        type="hidden"
-        name="allBoards"
-        value="<%= JSON.stringify(boards) %>"
-      />
-      <button type="submit">Submit</button>
-    </form>
+    <div class="container">
+      <h1>Select a Board</h1>
+      <form action="/boardSelected" method="post">
+        <div class="options-container">
+          <% boards.forEach(board => { %>
+          <label class="option-bar">
+            <input
+              type="radio"
+              name="selectedBoard"
+              value="<%= board.id %>"
+              style="display: none"
+            />
+            <%= board.name %>
+          </label>
+          <% }); %>
+        </div>
+        <!-- Hidden input field to store the JSON representation of boards -->
+        <input
+          type="hidden"
+          name="allBoards"
+          value="<%= JSON.stringify(boards) %>"
+        />
+        <!-- Use the same styling for the submit button as in your previous code -->
+        <button type="submit" class="btn btn-primary submit-button">
+          Submit
+        </button>
+      </form>
+    </div>
+    <script>
+      const optionBars = document.querySelectorAll(".option-bar");
+
+      optionBars.forEach((optionBar) => {
+        optionBar.addEventListener("click", () => {
+          optionBars.forEach((bar) => {
+            bar.classList.remove("selected");
+          });
+          optionBar.classList.add("selected");
+        });
+      });
+    </script>
   </body>
 </html>

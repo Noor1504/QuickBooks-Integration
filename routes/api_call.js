@@ -9,7 +9,7 @@ router.use(express.json());
 
 const monday = mondaySdk();
 // Assuming that app.cjs is in the same directory as api_call.js
-const { getBoardData } = require("../app.cjs");
+const { getBoardData, createColumn } = require("../app.cjs");
 
 /** /api_call **/
 router.get("/", function (req, res) {
@@ -115,28 +115,6 @@ router.get("/refresh", function (req, res) {
 });
 
 // Add this route to handle the board data retrieval
-// router.get("/get_board_data", async function (req, res) {
-//   console.log("api call get board data");
-//   try {
-//     const boardId = config.foundBoardId;
-//     console.log("current board id : ", boardId);
-//     if (!boardId) {
-//       console.log("Board ID not found in session.");
-//       res.status(400).json({ error: "Board ID not found in session." });
-//       return;
-//     }
-
-//     // Call the function to get board data using the Monday API
-//     const boardData = await getBoardData(boardId, res);
-
-//     // Send the board data as JSON response
-//     res.json(boardData);
-//   } catch (error) {
-//     console.error("Error while retrieving board data:", error);
-//     res.status(500).json({ error: "Error while retrieving board data." });
-//   }
-// });
-// Add this route to handle the board data retrieval
 router.get("/get_board_data", async function (req, res) {
   console.log("api call get board data");
   try {
@@ -147,7 +125,7 @@ router.get("/get_board_data", async function (req, res) {
       res.status(400).json({ error: "Board ID not found in session." });
       return;
     }
-
+    await createColumn(boardId);
     // Call the function to get board data using the Monday API
     const boardData = await getBoardData(boardId);
 
@@ -282,9 +260,8 @@ router.post("/updateCol", async function (req, res) {
   console.log("\n\n\n column values : ", columnValues);
   try {
     try {
-      const tokenResponse = await monday.setToken(
-        "eyJhbGciOiJIUzI1NiJ9.eyJ0aWQiOjI3MjU4Njk1MCwiYWFpIjoxMSwidWlkIjo0NDUwNTExNCwiaWFkIjoiMjAyMy0wOC0wMlQxMjoyNjo0Ni4wMDBaIiwicGVyIjoibWU6d3JpdGUiLCJhY3RpZCI6MTczOTg4NTcsInJnbiI6ImFwc2UyIn0.MR-bgaSU21ZrzXf3DzD6I8qieHcd-czG9iO0atQrSVw"
-      );
+      const accessToken = config.accessToken;
+      const tokenResponse = await monday.setToken(accessToken);
       console.log("token set : ", tokenResponse);
     } catch (err) {
       console.log("token err : ", err);

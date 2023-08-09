@@ -1,21 +1,58 @@
+<!DOCTYPE html>
 <html>
   <head>
     <title>OAuth2 Sample App - Intuit</title>
-    <link rel="stylesheet" type="text/css" href="style.css" />
-    <script>
-      if (window.opener) {
-        window.opener.location.href = "/submit#";
-        window.close();
+    <!-- Add Bootstrap CSS link -->
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+    />
+    <style>
+      /* Add custom styles */
+      body {
+        background-color: #f5f5f5;
+        font-family: Arial, sans-serif;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        margin: 0;
       }
-    </script>
+      .card {
+        width: 300px;
+        padding: 20px;
+        background-color: #fff;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        /* Increase the height */
+        height: 150px;
+      }
+      .sign-in-button {
+        background-color: #00c853;
+        border-color: #00c853;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        font-size: 18px;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+    </style>
   </head>
   <body>
-    <br /><br /><br />
-
-    <b>Sign In With Intuit</b><br />
-    <a class="imgLink" href="#" onclick="launchPopup('/sign_in_with_intuit')">
-      <img style="height: 40px" src="IntuitSignIn-lg-white@2x.jpg" />
-    </a>
+    <div class="card">
+      <h4>Sign In with Intuit</h4>
+      <button
+        class="btn btn-primary sign-in-button"
+        onclick="launchPopup('/sign_in_with_intuit')"
+      >
+        Sign In
+      </button>
+    </div>
 
     <script>
       function launchPopup(path) {
@@ -33,4 +70,10 @@
       }
     </script>
   </body>
+  <script>
+    if (window.opener) {
+      window.opener.location.href = "/loggedIn";
+      window.close(); // Close the popup
+    }
+  </script>
 </html>

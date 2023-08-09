@@ -1,9 +1,56 @@
 <html>
   <head>
     <title>My Quickbooks Integration with Monday.com</title>
-    <link rel="stylesheet" type="text/css" href="style.css" />
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+    />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
-
+    <style>
+      body {
+        background-color: #f5f5f5;
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+      }
+      .container {
+        margin-top: 10%;
+        padding: 20px;
+      }
+      .cards-container {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        margin-top: 20px;
+      }
+      .card {
+        width: 300px;
+        padding: 20px;
+        background-color: #fff;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        text-align: center;
+      }
+      .button-card {
+        display: inline-block;
+        padding: 10px;
+        border: 1px solid grey;
+        cursor: pointer;
+        background-color: #00c853;
+        border-color: #00c853;
+      }
+      /* Media query for mobile devices */
+      @media (max-width: 768px) {
+        .cards-container {
+          flex-direction: column;
+          align-items: center;
+        }
+        .card {
+          width: 80%;
+          margin-bottom: 20px;
+        }
+      }
+    </style>
     <script>
       function revokeCall() {
         $("#result").html("Loading...");
@@ -88,21 +135,22 @@
             col9_id = boardData[i].column_values[9].id;
 
             col0_val = custData.Customer.DisplayName;
-            col1_val = invoiceData.Balance;
-            col8_val = invoiceData.DueDate.substr(0, 10);
-            col2_val = invoiceData.SalesTermRef
+            col1_val = invoiceData.DueDate.substr(0, 10);
+            col2_val = invoiceData.Balance;
+            col3_val = invoiceData.SalesTermRef
               ? invoiceData.SalesTermRef.name
               : "NIL";
+
+            col4_val = custData.Customer.PrimaryEmailAddr.Address;
             col5_val =
               invoiceData.BillAddr.Line1 +
               "  " +
               invoiceData.BillAddr.City +
               "  " +
               invoiceData.BillAddr.Country;
-            col3_val = custData.Customer.PrimaryEmailAddr.Address;
-            col4_val = invoiceData.Line[1].Amount;
-            col6_val = invoiceData.TxnTaxDetail.TotalTax;
-            col7_val = invoiceData.MetaData.CreateTime.substr(0, 10);
+            col6_val = invoiceData.Line[1].Amount;
+            col7_val = invoiceData.TxnTaxDetail.TotalTax;
+            col8_val = invoiceData.MetaData.CreateTime.substr(0, 10);
             col9_val = invoiceData.MetaData.LastUpdatedTime.substr(0, 10);
 
             const postData = {
@@ -150,17 +198,37 @@
       }
     </script>
   </head>
+  <script>
+    if (window.opener) {
+      window.opener.location.href = "/connected";
+      window.close();
+    }
+  </script>
   <body>
-    <a href="/">Home</a>
-    <h3>Connected!</h3>
-    <p>Welcome<% if (locals.givenName) { %>, <%= locals.givenName %><% } %>!</p>
-    <div>
-      <button onclick="refreshCall()">Refresh Token Call</button>
-      <button onclick="revokeCall()">Revoke Token Call</button>
-      <button onclick="getBoardData()">Get Board Data</button>
-      <br /><br />
+    <div class="container">
+      <center><h3>Connected!</h3></center>
+      <br></br><br/>
+      <div class="cards-container">
+        <div class="card">
+          <h4>Refresh Token</h4>
+          <button class="btn btn-primary button-card" onclick="refreshCall()">
+            Refresh Token Call
+          </button>
+        </div>
+        <div class="card">
+          <h4>Revoke Token</h4>
+          <button class="btn btn-primary button-card" onclick="revokeCall()">
+            Revoke Token Call
+          </button>
+        </div>
+        <div class="card">
+          <h4>Get Board Data</h4>
+          <button class="btn btn-primary button-card" onclick="getBoardData()">
+            Get Board Data
+          </button>
+        </div>
+      </div>
+      <div><code id="result"></code></div>
     </div>
-
-    <div><code id="result"></code></div>
   </body>
 </html>

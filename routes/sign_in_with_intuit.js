@@ -4,6 +4,7 @@ var router = express.Router();
 
 /** /sign_in_with_intuit **/
 router.get("/", function (req, res) {
+  console.log("\n\ninside singIn INtuit .js");
   // Set the OpenID scopes
   tools.setScopes("sign_in_with_intuit");
 
