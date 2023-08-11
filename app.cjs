@@ -287,7 +287,7 @@ const getBoardData = async (boardId, res) => {
   const connect_to_quickbooks = require("./routes/connect_to_quickbooks.js");
   app.use("/connect_to_quickbooks", connect_to_quickbooks);
   app.use("/connect_handler", require("./routes/connect_handler.js"));
-
+  app.use("/create_invoice", require("./routes/create_invoice.js"));
   // Callback - called via redirect_uri after authorization
   app.use("/callback", require("./routes/callback.js"));
 

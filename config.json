@@ -25,6 +25,15 @@
       "email",
       "phone",
       "address"
+    ],
+    "create_invoice": [
+      "com.intuit.quickbooks.accounting",
+      "com.intuit.quickbooks.payment",
+      "openid",
+      "profile",
+      "email",
+      "phone",
+      "address"
     ]
   },
   "_locals": {},

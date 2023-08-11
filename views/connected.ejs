@@ -200,8 +200,12 @@
   </head>
   <script>
     if (window.opener) {
-      window.opener.location.href = "/connected";
-      window.close();
+        window.opener.location.href = "/connected#";
+        window.close();
+    }
+    function createInvoice() {
+     var path = "/create_invoice"; // Replace with the actual path for creating invoices
+     var newTab = window.open(path, '_blank');
     }
   </script>
   <body>
@@ -209,6 +213,18 @@
       <center><h3>Connected!</h3></center>
       <br></br><br/>
       <div class="cards-container">
+        <div class="card">
+          <h4>Get Board Data</h4>
+          <button class="btn btn-primary button-card" onclick="getBoardData()">
+            Get Board Data
+          </button>
+        </div>
+        <div class="card">
+          <h4>Create Invoice</h4>
+          <button class="btn btn-primary button-card" onclick="createInvoice()">
+            Create Invoice
+          </button>
+        </div>
         <div class="card">
           <h4>Refresh Token</h4>
           <button class="btn btn-primary button-card" onclick="refreshCall()">
@@ -221,13 +237,8 @@
             Revoke Token Call
           </button>
         </div>
-        <div class="card">
-          <h4>Get Board Data</h4>
-          <button class="btn btn-primary button-card" onclick="getBoardData()">
-            Get Board Data
-          </button>
-        </div>
       </div>
+      
       <div><code id="result"></code></div>
     </div>
   </body>
