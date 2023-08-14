@@ -29,7 +29,14 @@
         flex-direction: column;
         justify-content: space-between;
         /* Increase the height */
-        height: 150px;
+        height: 200px;
+      }
+      .card h4 {
+        margin-bottom: 10px;
+      }
+      .card p {
+        font-size: 14px;
+        color: #666;
       }
       .sign-in-button {
         background-color: #00c853;
@@ -46,6 +53,9 @@
   <body>
     <div class="card">
       <h4>Sign In with Intuit</h4>
+      <center>
+        <p>Click the button below to sign in using your Intuit account.</p>
+      </center>
       <button
         class="btn btn-primary sign-in-button"
         onclick="launchPopup('/sign_in_with_intuit')"

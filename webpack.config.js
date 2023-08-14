@@ -29,6 +29,9 @@ module.exports = (env, argv) => {
     optimization: {
       minimize: false,
     },
-    // ... other config options
+    // node: {
+    //   __dirname: false,
+    //   __filename: false,
+    // },
   };
 };

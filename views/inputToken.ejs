@@ -23,7 +23,7 @@
         padding: 20px;
         border-radius: 10px;
         box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-        max-width: 400px;
+        max-width: 600px;
         margin-top: 20px;
       }
       .submit-button {
@@ -36,11 +36,14 @@
     <div class="container">
       <div class="row justify-content-center">
         <div class="col-md-6 form-container">
+          <center><h1>Welcome to QuickBooks Integration!</h1></center>
+          <!-- Welcome message -->
           <form method="post" action="/submit">
             <div class="form-group">
               <label for="accessToken">Access Token:</label>
               <input
                 type="text"
+                placeholder="eyJhbGciOiJIUzI1NiJ9.eyJ0aWQiOjI3MjU4Njk1MCwiYWFpIjoxMSwidWlkIjo0ND............."
                 class="form-control"
                 id="accessToken"
                 name="accessToken"

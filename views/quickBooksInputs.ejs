@@ -61,15 +61,33 @@
       <form action="/submitOAuthSettings" method="post">
         <div class="form-group">
           <label for="clientId">Client ID:</label>
-          <input type="text" id="clientId" name="clientId" required />
+          <input
+            type="text"
+            id="clientId"
+            name="clientId"
+            placeholder="AB37yKv4EQyx7mBVPdVDVPJn4RLoAGE4YkBWoWm6ZUqvyFR8RP"
+            required
+          />
         </div>
         <div class="form-group">
           <label for="clientSecret">Client Secret:</label>
-          <input type="text" id="clientSecret" name="clientSecret" required />
+          <input
+            type="text"
+            id="clientSecret"
+            name="clientSecret"
+            placeholder="0ZYUyGRnnDwQzRNDq9wbU8JzUoDJSUR41QeTpqJQ"
+            required
+          />
         </div>
         <div class="form-group">
           <label for="redirectUri">Redirect URI:</label>
-          <input type="text" id="redirectUri" name="redirectUri" required />
+          <input
+            type="text"
+            id="redirectUri"
+            name="redirectUri"
+            placeholder="http://localhost:3000/callBack"
+            required
+          />
         </div>
         <button type="submit">Save Settings</button>
       </form>

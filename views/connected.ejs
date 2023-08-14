@@ -14,37 +14,60 @@
         padding: 0;
       }
       .container {
-        margin-top: 10%;
+        margin-top: 5%;
         padding: 20px;
       }
       .cards-container {
-        display: flex;
-        justify-content: center;
-        gap: 20px;
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 30px;
         margin-top: 20px;
       }
+
       .card {
-        width: 300px;
+        width: 400px;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
         padding: 20px;
         background-color: #fff;
         border-radius: 10px;
         box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-        text-align: center;
       }
+
+      .card h4 {
+        margin-bottom: 10px;
+      }
+
+      .card p {
+        margin-bottom: 20px;
+      }
+
+      .card-footer {
+        margin-top: auto;
+      }
+
       .button-card {
-        display: inline-block;
+        width: 100%;
         padding: 10px;
         border: 1px solid grey;
         cursor: pointer;
         background-color: #00c853;
         border-color: #00c853;
       }
+      
       /* Media query for mobile devices */
       @media (max-width: 768px) {
         .cards-container {
-          flex-direction: column;
-          align-items: center;
+          grid-template-columns: 1fr; /* One card per row */
         }
+        .card {
+          width: 80%; /* Adjust width for better mobile layout */
+          margin: 10px auto; /* Add margin for better spacing */
+        }
+      }
+      @media (max-width: 768px) {
         .card {
           width: 80%;
           margin-bottom: 20px;
@@ -211,34 +234,40 @@
   <body>
     <div class="container">
       <center><h3>Connected!</h3></center>
-      <br></br><br/>
+      <br></br>
       <div class="cards-container">
         <div class="card">
-          <h4>Get Board Data</h4>
+          <center>
+          <h4>Show Invoices Details</h4>
+          <p>Click the button below to fetch data from your QuickBooks and display it in Monday.com's table.</p>
+        </center>
           <button class="btn btn-primary button-card" onclick="getBoardData()">
-            Get Board Data
+             Show Invoices Details
           </button>
         </div>
         <div class="card">
-          <h4>Create Invoice</h4>
+          <center><h4>Create Invoice</h4>
+          <p>Click the button below to create a new invoice.</p></center>
           <button class="btn btn-primary button-card" onclick="createInvoice()">
             Create Invoice
           </button>
         </div>
         <div class="card">
-          <h4>Refresh Token</h4>
+          <center><h4>Refresh Token</h4>
+          <p>Click the button below to refresh the authentication token.</p></center>
           <button class="btn btn-primary button-card" onclick="refreshCall()">
             Refresh Token Call
           </button>
         </div>
         <div class="card">
-          <h4>Revoke Token</h4>
+          <center><h4>Revoke Token</h4>
+          <p>Click the button below to revoke the authentication token.</p></center>
           <button class="btn btn-primary button-card" onclick="revokeCall()">
             Revoke Token Call
           </button>
         </div>
       </div>
-      
+      <br><br>
       <div><code id="result"></code></div>
     </div>
   </body>
