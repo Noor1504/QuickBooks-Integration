@@ -331,6 +331,20 @@
     function createInvoice() {
      var path = "/create_invoice"; // Replace with the actual path for creating invoices
      var newTab = window.open(path, '_blank');
+     
+    }
+    async function createCustomer() {
+     var path = "/create_customer"; // Replace with the actual path for creating invoices
+     var newTab = window.open(path, '_blank');
+     await new Promise((resolve) => setTimeout(resolve, 10000));
+     console.log("\n\nredirection successful : ", newTab);
+     const response = await fetch("api_call/createCustomer", {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ newTab: newTab }), // Pass newTab object in the request body
+  });
     }
   </script>
   <body>
@@ -359,6 +373,13 @@
           <p>Click the button below to show the customers details.</p></center>
           <button class="btn btn-primary button-card" onclick="getCustomerData()">
             Customer Details
+          </button>
+        </div>
+        <div class="card">
+          <center><h4>New Customer</h4>
+          <p>Click the button below to create a new customer.</p></center>
+          <button class="btn btn-primary button-card" onclick="createCustomer()">
+            New Customer
           </button>
         </div>
         <div class="card">

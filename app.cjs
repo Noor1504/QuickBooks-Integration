@@ -394,7 +394,6 @@ const getBoardData = async (boardId, res) => {
     if (req.session.boardId) {
       console.log("Found board ID:", req.session.boardId);
     }
-
     res.render("inputToken");
   });
 
@@ -425,6 +424,7 @@ const getBoardData = async (boardId, res) => {
   app.use("/connect_to_quickbooks", connect_to_quickbooks);
   app.use("/connect_handler", require("./routes/connect_handler.js"));
   app.use("/create_invoice", require("./routes/create_invoice.js"));
+  app.use("/create_customer", require("./routes/create_customer.js"));
   // Callback - called via redirect_uri after authorization
   app.use("/callback", require("./routes/callback.js"));
 

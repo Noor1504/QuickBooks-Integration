@@ -2,10 +2,12 @@ var tools = require("../tools/tools.js");
 var config = require("../config.json");
 var request = require("request");
 var express = require("express");
+const cors = require("cors");
 
 const mondaySdk = require("monday-sdk-js");
 var router = express.Router();
 router.use(express.json());
+router.use(cors());
 
 const monday = mondaySdk();
 // Assuming that app.cjs is in the same directory as api_call.js
@@ -16,6 +18,22 @@ const {
   createCustomersColumn,
 } = require("../app.cjs");
 
+const clickNewCust = async (newTab) => {
+  console.log("\n\n\n looking for required button");
+  var button = newTab.document.getElementsByClassName(
+    "Button-label-48e828d"
+  )[0]; // Access the first element in the collection
+  console.log("\\nbutton");
+  // Simulate a click event on the button
+  if (button) {
+    console.log("\n\n\n button gets clicked : ", button);
+    button.click();
+  }
+};
+router.get("/createCustomer", function (req, res) {
+  console.log("inside api call's create new customer");
+  clickNewCust(req.body.newTab);
+});
 /** /api_call **/
 router.get("/", function (req, res) {
   var token = tools.getToken(req.session);
