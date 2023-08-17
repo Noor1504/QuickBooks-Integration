@@ -75,12 +75,7 @@
       }
     </style>
     <script>
-      function revokeCall() {
-        $("#result").html("Loading...");
-        $.get("/api_call/revoke", function (data) {
-          $("#result").html(JSON.stringify(data, null, 2));
-        });
-      }
+      
       function refreshCall() {
         $("#result").html("Loading...");
         $.get("/api_call/refresh", function (data) {
@@ -90,6 +85,7 @@
 
       var invoiceData = [];
       var custData = [];
+      var custDetails=[];
       async function customerCall(customerRefValue) {
         try {
           // Make a GET request to the new route on your server to get customer data
@@ -113,7 +109,15 @@
           await customerCall(invoiceData.CustomerRef.value);
         } catch (error) {}
       }
-
+      async function customerDetails(custName){
+        try{
+          const data = await $.get("/api_call/customerInfo", {custName:custName});
+          console.log("\n\n Customer info  : ", data.QueryResponse.Customer[0]);
+          custDetails = data.QueryResponse.Customer[0];
+        }catch(err){
+          console.log("customerError " , err);
+        }
+      }
       let boardData = [],
         no_of_items = 0;
       async function getBoardData() {
@@ -219,6 +223,104 @@
           $("#boardDataResult").html("Error: " + JSON.stringify(error));
         }
       }
+    
+      async function getCustomerData() {
+        $("#result").html("Working...");
+        // Make a GET request to the new route on your server to get board data
+        try {
+          // Make a GET request to the new route on your server to get board data
+          const data = await fetch("api_call/get_cust_board_data");
+          const jsonData = await data.json();
+
+          // Extract the boardId and boardData from the response
+          const { boardId, boardData: receivedBoardData } = jsonData;
+
+          boardData = receivedBoardData;
+
+          let i = 0;
+          let board_id = boardData.boardId;
+          boardData = boardData.boardData;
+          no_of_items = boardData.length;
+          console.log("\n \n boardData : ", boardData);
+
+          while (no_of_items > 0) {
+            const custName = boardData[i].name;
+
+            await customerDetails(custName);
+
+
+            //---------------------------------------------------------------------------------
+            console.log(i + 1);
+            custDetails = JSON.stringify(custDetails, null, 2);
+            custDetails = JSON.parse(custDetails);
+
+            console.log("\n\ncustomer details  :", custDetails)
+            itemId = boardData[i].id;
+            col0_id = boardData[i].column_values[0].id;
+            col1_id = boardData[i].column_values[1].id;
+            col2_id = boardData[i].column_values[2].id;
+            col3_id = boardData[i].column_values[3].id;
+            col4_id = boardData[i].column_values[4].id;
+            col5_id = boardData[i].column_values[5].id;
+            col6_id = boardData[i].column_values[6].id;
+            col7_id = boardData[i].column_values[7].id;
+            
+            col0_val = custDetails.Taxable;
+            col1_val = custDetails.Balance;
+            col2_val = custDetails.CurrencyRef.value;
+            col3_val = custDetails.CompanyName;
+            col4_val = custDetails.PrimaryEmailAddr.Address;
+            col5_val =
+              custDetails.BillAddr.Line1 +
+              "  " +
+              custDetails.BillAddr.City +
+              "  " +
+              custDetails.BillAddr.Country;
+            col6_val = custDetails.MetaData.CreateTime.substr(0, 10);
+            col7_val = custDetails.MetaData.LastUpdatedTime.substr(0, 10);
+
+            const postData = {
+              boardId: board_id,
+              itemId: itemId,
+              columns: [
+                { id: col0_id, value: col0_val },
+                { id: col1_id, value: col1_val },
+                { id: col2_id, value: col2_val },
+                { id: col3_id, value: col3_val },
+                { id: col4_id, value: col4_val },
+                { id: col5_id, value: col5_val },
+                { id: col6_id, value: col6_val },
+                { id: col7_id, value: col7_val },
+              ],
+            };
+            try {
+              const response = await fetch("/api_call/updateCol", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify(postData),
+              });
+
+              if (response.ok) {
+                const responseData = await response.json();
+                console.log("Response from server:", responseData);
+              } else {
+                console.error("Error from server:", response.statusText);
+              }
+            } catch (error) {
+              console.error("Error while getting invoice data:", error);
+            }
+            no_of_items--;
+            i++;
+          }
+          $("#result").html("Board Data updated Successfully");
+        } catch (error) {
+          console.error("Error while getting board data:", error);
+          $("#boardDataResult").html("Error: " + JSON.stringify(error));
+        }
+      }
+   
     </script>
   </head>
   <script>
@@ -253,19 +355,20 @@
           </button>
         </div>
         <div class="card">
+          <center><h4>Show Customers Details</h4>
+          <p>Click the button below to show the customers details.</p></center>
+          <button class="btn btn-primary button-card" onclick="getCustomerData()">
+            Customer Details
+          </button>
+        </div>
+        <div class="card">
           <center><h4>Refresh Token</h4>
           <p>Click the button below to refresh the authentication token.</p></center>
           <button class="btn btn-primary button-card" onclick="refreshCall()">
             Refresh Token Call
           </button>
         </div>
-        <div class="card">
-          <center><h4>Revoke Token</h4>
-          <p>Click the button below to revoke the authentication token.</p></center>
-          <button class="btn btn-primary button-card" onclick="revokeCall()">
-            Revoke Token Call
-          </button>
-        </div>
+        
       </div>
       <br><br>
       <div><code id="result"></code></div>

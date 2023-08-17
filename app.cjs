@@ -2,11 +2,8 @@ const path = require("path");
 const express = require("express");
 const session = require("express-session");
 const mondaySdk = require("monday-sdk-js");
-const fs = require("fs/promises");
-const myFs = require("fs");
+const sessionStorage = require("sessionstorage");
 const bodyParser = require("body-parser");
-const { config } = require("process");
-var myConfig = require("./config.json");
 
 const app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -19,14 +16,16 @@ const sessionMiddleware = session({
 app.use(sessionMiddleware);
 const monday = mondaySdk();
 
-// Read and import config.json using fs module
 const loadConfig = async () => {
   try {
-    const configPath = path.join(__dirname, "config.json");
-    const data = await fs.readFile(configPath, "utf8");
-    return JSON.parse(data);
+    const configData = require("./config.json"); // Use a static path here
+    console.log("\n\n\n data of config.json : \n\n", configData);
+    console.log("\n\naccessToken : ", configData.accessToken);
+    await monday.setToken(configData.accessToken);
+    console.log("\ntoken has been set successfully");
+    return configData;
   } catch (error) {
-    console.error("Error reading config.json:", error);
+    console.error("Error reading config from session storage:", error);
     return null;
   }
 };
@@ -34,22 +33,126 @@ const loadConfig = async () => {
 const saveBoardId = async (config, boardId) => {
   // Store the foundBoardId in the config object
   config.foundBoardId = boardId;
-  const configPath = path.join(__dirname, "config.json");
-  await fs.writeFile(configPath, JSON.stringify(config, null, 2), "utf8");
+  sessionStorage.setItem("config", JSON.stringify(config));
   console.log("Config updated and saved successfully.");
 };
 // Function to check if a column with the given title exists in the board's columns
 const doesColumnExist = (columns, columnTitle) => {
   return columns.some((column) => column.title === columnTitle);
 };
+
+const createWorkspace = async () => {
+  // try {
+  //   console.log("\n\n\n create workspace is working");
+  //   const accessToken = myConfig.accessToken;
+  //   await monday.setToken(accessToken);
+  //   const workspaceCreation = await monday.api(
+  //     `mutation {create_workspace (name:\"New Workspace\", kind: open, description: \"This is a cool description\") {id description}}`
+  //   );
+  //   console.log(workspaceCreation);
+  // } catch (error) {
+  //   console.error("Error creating workspace : ", error);
+  // }
+};
+
+const createCustomersColumn = async (boardId) => {
+  try {
+    // console.log("\n\n\n create column is working");
+    // const data = await sessionStorage.getItem("config");
+    // console.log("\n\nData Retrieved : ", data);
+    // const parsedData = JSON.parse(data);
+    // console.log("\n\nParsed myConfig : ", parsedData);
+    const existingColumnsResponse = await monday.api(
+      `query {
+        boards(ids: ${boardId}) {
+          columns {
+            id
+            title
+          }
+        }
+      }`
+    );
+
+    const existingColumns = existingColumnsResponse.data.boards[0].columns;
+
+    const columnsToCreate = [
+      // Define your columns to create here
+      {
+        title: "Taxable",
+        column_type: "text",
+      },
+      {
+        title: "Balance",
+        column_type: "numbers",
+      },
+      {
+        title: "Currency",
+        column_type: "text",
+      },
+      {
+        title: "Company Name",
+        column_type: "text",
+      },
+      {
+        title: "Email Address",
+        description: "This is my emails column",
+        column_type: "text",
+      },
+      {
+        title: "Address",
+        description: "This is my address column",
+        column_type: "text",
+      },
+      {
+        title: "Creation Date",
+        description: "This is my creation date column",
+        column_type: "date",
+      },
+      {
+        title: "Updated Date",
+        description: "This is my updated date column",
+        column_type: "date",
+      },
+    ];
+
+    for (const columnData of columnsToCreate) {
+      const columnTitle = columnData.title;
+
+      // Check if the column with the same title already exists
+      if (doesColumnExist(existingColumns, columnTitle)) {
+        console.log(
+          `Column '${columnTitle}' already exists. Skipping creation.`
+        );
+        continue;
+      }
+
+      const createColumnResponse = await monday.api(
+        `mutation {
+          create_column(
+            board_id: ${boardId},
+            title: "${columnTitle}",
+            column_type: ${columnData.column_type}
+          ) {
+            id
+            title
+          }
+        }`
+      );
+      console.log(JSON.stringify(createColumnResponse));
+    }
+    // saveBoardId(config, boardId);
+  } catch (error) {
+    console.error("Error creating column:", error);
+  }
+};
 // Function to create a column using the Monday API
 const createColumn = async (boardId) => {
   try {
-    console.log("\n\n\n create column is working");
-    const accessToken = myConfig.accessToken; // Remove JSON.stringify here
-    console.log("\n\naccessToken in creating column is: ", accessToken);
-    console.log("\n\n\nboardid in config.json : ", myConfig.foundBoardId);
-    await monday.setToken(accessToken);
+    // console.log("\n\n\n create column is working");
+    // const data = await sessionStorage.getItem("config");
+    // console.log("\n\nData Retrieved : ", data);
+    // const parsedData = JSON.parse(data);
+    // console.log("\n\nParsed myConfig : ", parsedData);
     const existingColumnsResponse = await monday.api(
       `query {
         boards(ids: ${boardId}) {
@@ -142,7 +245,6 @@ const createColumn = async (boardId) => {
           }
         }`
       );
-
       console.log(JSON.stringify(createColumnResponse));
     }
     // saveBoardId(config, boardId);
@@ -153,8 +255,34 @@ const createColumn = async (boardId) => {
 
 const getBoardData = async (boardId, res) => {
   console.log("inside getBoardData of app.cjs");
-  const accessToken = myConfig.accessToken;
-  await monday.setToken(accessToken);
+  // const boardCreated1 = await monday.api(
+  //   `mutation {
+  //     create_board(board_name: \"Invoices\", board_kind: public, workspace_id:35310) {
+  //       id
+  //     }
+  //   }`
+  // );
+  // const boardCreated2 = await monday.api(
+  //   `mutation {
+  //     create_board(board_name: \"Customers\", board_kind: public, workspace_id:35310) {
+  //       id
+  //     }
+  //   }`
+  // );
+  // const boardCreated3 = await monday.api(
+  //   `mutation {
+  //     create_board(board_name: \"Draft Invoices\", board_kind: public, workspace_id:35310) {
+  //       id
+  //     }
+  //   }`
+  // );
+  // console.log(
+  //   "\n\n\n  boardsCreated : ",
+  //   JSON.stringify(boardCreated1),
+  //   JSON.stringify(boardCreated2),
+  //   JSON.stringify(boardCreated3)
+  // );
+
   const groupsResponse = await monday.api(
     `query {boards (ids: ${boardId}) {groups {title id}}}`
   );
@@ -176,7 +304,7 @@ const getBoardData = async (boardId, res) => {
     console.error("Could not load config.json. Exiting...");
     process.exit(1);
   }
-
+  sessionStorage.setItem("config", JSON.stringify(config));
   app.set("views", path.join(__dirname, "views"));
   app.set("view engine", "ejs");
   app.use(express.static(path.join(__dirname, "public")));
@@ -186,13 +314,19 @@ const getBoardData = async (boardId, res) => {
   app.post("/submit", async function (req, res) {
     console.log("\n\n\ninside /submit");
     const accessToken = req.body.accessToken;
-    // Save the access token to config.json
-    const configPath = path.join(__dirname, "config.json");
-    const configData = require(configPath);
-    configData.accessToken = accessToken;
 
-    // Write the updated data back to the config.json file
-    myFs.writeFileSync(configPath, JSON.stringify(configData, null, 2), "utf8");
+    // Save the access token to config.json
+    // const configPath = path.join(__dirname, "config.json");
+    // const configData = require(configPath);
+    // configData.accessToken = accessToken;
+
+    // // Write the updated data back to the config.json file
+    // myFs.writeFileSync(configPath, JSON.stringify(configData, null, 2), "utf8");
+    const config = sessionStorage.getItem("config");
+    console.log("config received : ", config);
+    config.accessToken = accessToken;
+    sessionStorage.setItem("config", JSON.stringify(config));
+
     monday.setToken(accessToken);
     monday
       .api(`query{boards (limit:10) {id name} }`)
@@ -200,10 +334,16 @@ const getBoardData = async (boardId, res) => {
         console.log("API Response:", apiResponse);
         const boards = apiResponse.data.boards;
         console.log("all boards : ", boards);
-
-        // Render the selectBoard.ejs template with the fetched boards data
-        res.render("selectBoard.ejs", { boards: boards });
+        // monday.api(`query{workspaces  {id name} }`).then((apiResponse) => {
+        // console.log("API Response:", apiResponse);
+        // const workspaces = apiResponse.data.workspaces;
+        // console.log("all workspaces : ", workspaces);
+        res.render("selectBoard.ejs", {
+          boards: boards,
+        });
+        // });
       })
+
       .catch((error) => {
         console.error("API Error:", error);
         // Handle the error and send an appropriate response
@@ -265,17 +405,14 @@ const getBoardData = async (boardId, res) => {
     const redirectUri = req.body.redirectUri;
 
     // Read the existing content of config.json
-    const configPath = path.join(__dirname, "config.json");
-    const configData = require(configPath);
+    const configData = sessionStorage.getItem("config");
 
     // Update the values
     configData.clientId = clientId;
     configData.clientSecret = clientSecret;
     configData.redirectUri = redirectUri;
-
-    // Write the updated data back to the config.json file
-    myFs.writeFileSync(configPath, JSON.stringify(configData, null, 2), "utf8");
-    res.render("signIn", config);
+    sessionStorage.setItem("config", JSON.stringify(configData));
+    res.render("signIn");
   });
 
   // Sign In With Intuit, Connect To QuickBooks, or Get App Now
@@ -303,4 +440,6 @@ const getBoardData = async (boardId, res) => {
 module.exports = {
   getBoardData,
   createColumn,
+  createWorkspace,
+  createCustomersColumn,
 };

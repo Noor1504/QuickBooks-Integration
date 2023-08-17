@@ -1,14 +1,18 @@
 const path = require("path");
+const HtmlWebpackPlugin = require("html-webpack-plugin");
 
 module.exports = (env, argv) => {
-  // const isDevelopment = argv.mode === "production";
-
   return {
     entry: "./app.cjs", // Your entry file
     output: {
       filename: "bundle.js",
-      path: path.resolve(__dirname, "dist"),
+      path: path.resolve(__dirname, "build"),
     },
+    plugins: [
+      new HtmlWebpackPlugin({
+        title: "QuickBooks Integration", 
+      }),
+    ],
     resolve: {
       fallback: {
         url: require.resolve("url/"),
@@ -24,14 +28,13 @@ module.exports = (env, argv) => {
         timers: require.resolve("timers-browserify"),
       },
     },
-    // ... other config options
-    // target: isDevelopment ? "web" : "node",
+    target: "node",
     optimization: {
       minimize: false,
     },
-    // node: {
-    //   __dirname: false,
-    //   __filename: false,
-    // },
+    mode: "development",
+    externals: {
+      express: "express",
+    },
   };
 };

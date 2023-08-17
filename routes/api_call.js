@@ -9,7 +9,12 @@ router.use(express.json());
 
 const monday = mondaySdk();
 // Assuming that app.cjs is in the same directory as api_call.js
-const { getBoardData, createColumn } = require("../app.cjs");
+const {
+  getBoardData,
+  createColumn,
+  createWorkspace,
+  createCustomersColumn,
+} = require("../app.cjs");
 
 /** /api_call **/
 router.get("/", function (req, res) {
@@ -125,6 +130,8 @@ router.get("/get_board_data", async function (req, res) {
       res.status(400).json({ error: "Board ID not found in session." });
       return;
     }
+    await createWorkspace();
+    console.log("\n\n\n workspace created successfully");
     await createColumn(boardId);
     // Call the function to get board data using the Monday API
     const boardData = await getBoardData(boardId);
@@ -136,7 +143,29 @@ router.get("/get_board_data", async function (req, res) {
     res.status(500).json({ error: "Error while retrieving board data." });
   }
 });
+router.get("/get_cust_board_data", async function (req, res) {
+  console.log("api call get customer board data");
+  try {
+    const boardId = config.foundBoardId;
+    console.log("current board id : ", boardId);
+    if (!boardId) {
+      console.log("Board ID not found in session.");
+      res.status(400).json({ error: "Board ID not found in session." });
+      return;
+    }
+    // await createWorkspace();
+    console.log("\n\n\n workspace created successfully");
+    await createCustomersColumn(boardId);
+    // Call the function to get board data using the Monday API
+    const boardData = await getBoardData(boardId);
 
+    // Send the board data as JSON response along with the boardId
+    res.json({ boardId, boardData });
+  } catch (error) {
+    console.error("Error while retrieving board data:", error);
+    res.status(500).json({ error: "Error while retrieving board data." });
+  }
+});
 router.get("/invoice", function (req, res) {
   console.log("inside api call's invoice call function");
   var token = tools.getToken(req.session);
@@ -154,6 +183,54 @@ router.get("/invoice", function (req, res) {
     config.api_uri +
     req.session.realmId +
     "/query?query=select * from Invoice where DocNumber = '" +
+    docNum +
+    "'&minorversion=40";
+  console.log("Making API call to: " + url);
+
+  var requestObj = {
+    url: url,
+    headers: {
+      Authorization: "Bearer " + token.accessToken,
+      Accept: "application/json",
+    },
+  };
+
+  // Make API call
+  request(requestObj, function (err, response) {
+    // Check if 401 response was returned - refresh tokens if so!
+    tools.checkForUnauthorized(req, requestObj, err, response).then(
+      function ({ err, response }) {
+        if (err || response.statusCode != 200) {
+          return res.json({ error: err, statusCode: response.statusCode });
+        }
+
+        // API Call was a success!
+        res.json(JSON.parse(response.body));
+      },
+      function (err) {
+        console.log(err);
+        return res.json(err);
+      }
+    );
+  });
+});
+router.get("/customerInfo", function (req, res) {
+  console.log("inside api call's customerInfo function");
+  var token = tools.getToken(req.session);
+  if (!token) return res.json({ error: "Not authorized" });
+  if (!req.session.realmId)
+    return res.json({
+      error:
+        "No realm ID.  QBO calls only work if the accounting scope was passed!",
+    });
+  var docNum = req.query.custName;
+  console.log("Received docNum: ", docNum);
+  console.log("\n\n\nmaking custoemr api call \n\n\n");
+  // Set up API call (with OAuth2 accessToken)
+  var url =
+    config.api_uri +
+    req.session.realmId +
+    "/query?query=select * from Customer where DisplayName = '" +
     docNum +
     "'&minorversion=40";
   console.log("Making API call to: " + url);
@@ -275,23 +352,6 @@ router.post("/updateCol", async function (req, res) {
     } catch (error) {
       console.error("Error while inserting data:", error);
     }
-
-    // await monday.api(
-    //   `mutation {change_multiple_column_values(item_id:1808846278, board_id:1808846275, column_values: \"{
-    //   \\\"customer_name35\\\" : \\\"Maida\\\"}\") {id}}`
-    //   // `mutation{change_simple_column_value (item_id: ${itemId}, board_id: ${boardId}, column_id:\"customer_name35\", value: \"Maida Shahid\"){id}}`
-    //   // `mutation {change_multiple_column_values(item_id:${itemId}, board_id:${boardId}, column_values: \"{${columnValues}}\") {id}}`
-    //   // `mutation {change_multiple_column_values(item_id:${itemId}, board_id:${boardId}, column_values: \"{\\\"invoice_status\\\" : \\\"Done\\\",
-    //   //  \\\"customer_name35\\\" : \\\"Maida\\\",
-    //   //  \\\"due_date\\\" : \\\"2023-08-03\\\",\\\"balance_due\\\" : \\\"35\\\",
-    //   //  \\\"sales_terms\\\" : \\\"Net 30\\\", \\\"email\\\" : \\\"noor.fatima@techloyce.com\\\",
-    //   //   \\\"address\\\" : \\\"123 Main Street, City : Lahore, Country : Pakistan, CountrySubDivisionCode : CA, PostalCode : 52000\\\",
-    //   //    \\\"subtotal\\\" : \\\"35\\\" , \\\"sales_tax\\\" : \\\"0\\\", \\\"creation_date\\\" : \\\"2023-07-30\\\" ,
-    //   //     \\\"updated_date\\\" : \\\"2023-07-30\\\"}\") {id}}`
-    // );
-
-    // var query = "mutation {change_multiple_column_values (item_id: 1234567890, board_id: 9876543210, column_values: \"{\\\"status\\\": {\\\"index\\\": 1},\\\"date4\\\": {\\\"date\\\":\\\"2021-01-01\\\"}, \\\"person\\\" : {\\\"personsAndTeams\\\":[{\\\"id\\\":9603417,\\\"kind\\\":\\\"person\\\"}]}}\") {id}}";
-
     console.log("Data inserted successfully");
     res.json({ success: true });
   } catch (error) {

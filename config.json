@@ -38,6 +38,6 @@
   },
   "_locals": {},
   "foundBoardId": "1808846275",
-  "mode": "production",
-  "accessToken": "eyJhbGciOiJIUzI1NiJ9.eyJ0aWQiOjI3MjU4Njk1MCwiYWFpIjoxMSwidWlkIjo0NDUwNTExNCwiaWFkIjoiMjAyMy0wOC0wMlQxMjoyNjo0Ni4wMDBaIiwicGVyIjoibWU6d3JpdGUiLCJhY3RpZCI6MTczOTg4NTcsInJnbiI6ImFwc2UyIn0.MR-bgaSU21ZrzXf3DzD6I8qieHcd-czG9iO0atQrSVw"
+  "mode": "development",
+  "accessToken": "eyJhbGciOiJIUzI1NiJ9.eyJ0aWQiOjI3NTAyNDc4NCwiYWFpIjoxMSwidWlkIjo0NDUwNTExNCwiaWFkIjoiMjAyMy0wOC0xNFQxNzo0MzoyMS42MDhaIiwicGVyIjoibWU6d3JpdGUiLCJhY3RpZCI6MTczOTg4NTcsInJnbiI6ImFwc2UyIn0.038C_oXw8oazDkSROMFDzFMzn1-b1N8OGZve_iIMUsI"
 }
