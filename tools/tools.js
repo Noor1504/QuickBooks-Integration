@@ -153,11 +153,13 @@ var Tools = function () {
 
   // Get anti-forgery token to use for state
   this.generateAntiForgery = function (session) {
+    console.log("\n\n generating anti forgery : ", session.secret);
     session.secret = csrf.secretSync();
     return csrf.create(session.secret);
   };
 
   this.verifyAntiForgery = function (session, token) {
+    console.log("\n\nverifying anti forgery");
     return csrf.verify(session.secret, token);
   };
 

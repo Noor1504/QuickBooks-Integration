@@ -245,7 +245,7 @@
 
           while (no_of_items > 0) {
             const custName = boardData[i].name;
-
+            console.log("\n\ncustomer name is : ", custName)
             await customerDetails(custName);
 
 
@@ -336,15 +336,15 @@
     async function createCustomer() {
      var path = "/create_customer"; // Replace with the actual path for creating invoices
      var newTab = window.open(path, '_blank');
-     await new Promise((resolve) => setTimeout(resolve, 10000));
-     console.log("\n\nredirection successful : ", newTab);
-     const response = await fetch("api_call/createCustomer", {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ newTab: newTab }), // Pass newTab object in the request body
-  });
+    //  await new Promise((resolve) => setTimeout(resolve, 10000));
+  //    console.log("\n\nredirection successful : ", newTab);
+  //    const response = await fetch("api_call/createCustomer", {
+  //   method: "GET",
+  //   headers: {
+  //     "Content-Type": "application/json",
+  //   },
+  //   body: JSON.stringify({ newTab: newTab }), // Pass newTab object in the request body
+  // });
     }
   </script>
   <body>

@@ -7,8 +7,11 @@
       rel="stylesheet"
       href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
     />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
+    />
     <style>
-      /* Add custom styles */
       body {
         background-color: #f5f5f5;
         font-family: Arial, sans-serif;
@@ -19,9 +22,9 @@
         margin: 0;
       }
       .container {
-        width: 400px;
+        width: 700px;
         padding: 20px;
-        background-color: #f5f5f5; /* Dark background color */
+        background-color: #f5f5f5;
         border-radius: 10px;
         box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
       }
@@ -34,9 +37,10 @@
       }
       label {
         font-weight: bold;
+        width: 20%;
       }
       input {
-        width: 100%;
+        width: 50%;
         padding: 8px;
         border: 1px solid #d1d1d1;
         border-radius: 5px;
@@ -53,6 +57,21 @@
       button:hover {
         background-color: #008040;
       }
+      .input-group-icon {
+        position: relative;
+        display: flex;
+        align-items: center;
+      }
+      .input-guide {
+        position: absolute;
+        top: 100%;
+        left: 100%;
+        width: 100%;
+        background-color: #fff;
+        border: 1px solid #ccc;
+        padding: 10px;
+        display: none;
+      }
     </style>
   </head>
   <body>
@@ -60,37 +79,78 @@
       <h1>OAuth Settings</h1>
       <form action="/submitOAuthSettings" method="post">
         <div class="form-group">
-          <label for="clientId">Client ID:</label>
-          <input
-            type="text"
-            id="clientId"
-            name="clientId"
-            placeholder="AB37yKv4EQyx7mBVPdVDVPJn4RLoAGE4YkBWoWm6ZUqvyFR8RP"
-            required
-          />
+          <div class="input-group-icon">
+            <label for="client-id">Client ID</label>
+            <input
+              type="text"
+              placeholder="AB37yKv4EQyx7mBVPdVDVPJn4RLoAGE4YkBWoWm6ZUqvyFR8RP"
+              class="form-control"
+              id="client-id"
+              name="client-id"
+              required
+            />
+            &nbsp;
+            <i class="fa fa-question-circle" id="id-icon"></i>
+            <div class="input-guide" id="id-guide">
+              You can get your client id from
+              <a
+                href="https://developer.intuit.com/app/developer/appdetail/test/keys?appId=djQuMTo6OGQzYmJlYTI3Yg:ab8b0d2a-0e01-4b83-8f54-6f04bea8c9e9"
+                target="_blank"
+              >
+                intuit Developer&gt;&gt;My Apps Dashboard&gt;&gt;Your
+                App&gt;&gt;Keys and Credentials
+              </a>
+            </div>
+          </div>
         </div>
         <div class="form-group">
-          <label for="clientSecret">Client Secret:</label>
-          <input
-            type="text"
-            id="clientSecret"
-            name="clientSecret"
-            placeholder="0ZYUyGRnnDwQzRNDq9wbU8JzUoDJSUR41QeTpqJQ"
-            required
-          />
+          <div class="input-group-icon">
+            <label for="client-secret">Client Secret</label>
+            <input
+              type="text"
+              placeholder="0ZYUyGRnnDwQzRNDq9wbU8JzUoDJSUR41QeTpqJQ"
+              class="form-control"
+              id="client-secret"
+              name="client-secret"
+              required
+            />
+            &nbsp;
+            <i class="fa fa-question-circle" id="sec-icon"></i>
+            <div class="input-guide" id="sec-guide">
+              You can get your client secret from
+              <a
+                href="https://developer.intuit.com/app/developer/appdetail/test/keys?appId=djQuMTo6OGQzYmJlYTI3Yg:ab8b0d2a-0e01-4b83-8f54-6f04bea8c9e9"
+                target="_blank"
+              >
+                intuit Developer&gt;&gt;My Apps Dashboard&gt;&gt;Your
+                App&gt;&gt;Keys and Credentials
+              </a>
+            </div>
+          </div>
         </div>
-        <div class="form-group">
-          <label for="redirectUri">Redirect URI:</label>
-          <input
-            type="text"
-            id="redirectUri"
-            name="redirectUri"
-            placeholder="http://localhost:3000/callBack"
-            required
-          />
-        </div>
+        <h5>
+          Add this RedirectURI http://localhost:3000/callback in your Redirect
+          URIs
+        </h5>
+        <br /><br />
         <button type="submit">Save Settings</button>
       </form>
     </div>
   </body>
+  <script>
+    const idicon = document.getElementById("id-icon");
+    const idguide = document.getElementById("id-guide");
+
+    idicon.addEventListener("click", () => {
+      idguide.style.display =
+        idguide.style.display === "block" ? "none" : "block";
+    });
+    const secIcon = document.getElementById("sec-icon");
+    const secGuide = document.getElementById("sec-guide");
+
+    secIcon.addEventListener("click", () => {
+      secGuide.style.display =
+        secGuide.style.display === "block" ? "none" : "block";
+    });
+  </script>
 </html>

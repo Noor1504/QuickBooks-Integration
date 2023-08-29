@@ -6,12 +6,10 @@ var router = express.Router();
 // This would be the endpoint that is called when "Get App Now" is clicked
 // from apps.com
 router.get("/", function (req, res) {
-  // Set the OpenID + Accounting + Payment scopes
   tools.setScopes("connect_handler");
-
+  console.log("\n\ninside connect_handler");
   // Constructs the authorization URI.
   var uri = tools.intuitAuth.code.getUri({
-    // Add CSRF protection
     state: tools.generateAntiForgery(req.session),
   });
 

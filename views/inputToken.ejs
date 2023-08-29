@@ -1,4 +1,3 @@
-<!-- views/home.ejs -->
 <!DOCTYPE html>
 <html>
   <head>
@@ -7,6 +6,11 @@
     <link
       rel="stylesheet"
       href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+    />
+    <!-- Add Font Awesome for the question mark icon -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
     />
     <style>
       /* Add custom styles */
@@ -30,32 +34,77 @@
         background-color: #00c853;
         border-color: #00c853;
       }
+      /* Add styles for the icon */
+      .input-group-icon {
+        position: relative;
+        display: flex;
+        align-items: center;
+      }
+      .input-guide {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        background-color: #fff;
+        border: 1px solid #ccc;
+        padding: 10px;
+        display: none;
+      }
     </style>
   </head>
   <body>
     <div class="container">
       <div class="row justify-content-center">
-        <div class="col-md-6 form-container">
+        <div class="col-md-9 form-container">
           <center><h1>Welcome to QuickBooks Integration!</h1></center>
+          <br />
           <!-- Welcome message -->
           <form method="post" action="/submit">
             <div class="form-group">
-              <label for="accessToken">Access Token:</label>
-              <input
-                type="text"
-                placeholder="eyJhbGciOiJIUzI1NiJ9.eyJ0aWQiOjI3MjU4Njk1MCwiYWFpIjoxMSwidWlkIjo0ND............."
-                class="form-control"
-                id="accessToken"
-                name="accessToken"
-                required
-              />
+              <div class="input-group-icon">
+                <label for="accessToken">Access Token:</label>
+
+                <input
+                  type="text"
+                  placeholder="eyJhbGciOiJIUzI1NiJ9.eyJ0aWQiOjI3NTAyNDc4NCwiYWFpIjoxMSwidWlkIjo0NDUwNTExNCwiaWFkIjoiMjAyMy0wOC0xNFQxNzo0MzoyMS"
+                  class="form-control"
+                  id="accessToken"
+                  name="accessToken"
+                  required
+                />
+                &nbsp;
+                <i class="fa fa-question-circle" id="icon"></i>
+                <div class="input-guide" id="guide">
+                  You can get your access token from
+                  <a
+                    href="https://techloyce393322.monday.com/apps/manage/tokens"
+                    target="_blank"
+                  >
+                    monday Developer Center &gt;&gt; My access tokens
+                  </a>
+                </div>
+              </div>
             </div>
-            <button type="submit" class="btn btn-primary submit-button">
-              Submit
-            </button>
+            <br /><br />
+            <center>
+              <button type="submit" class="btn btn-primary submit-button">
+                Submit
+              </button>
+            </center>
           </form>
         </div>
       </div>
     </div>
+
+    <script>
+      // JavaScript to toggle the guide visibility
+      const icon = document.getElementById("icon");
+      const guide = document.getElementById("guide");
+
+      icon.addEventListener("click", () => {
+        // Toggle guide visibility
+        guide.style.display =
+          guide.style.display === "block" ? "none" : "block";
+      });
+    </script>
   </body>
 </html>

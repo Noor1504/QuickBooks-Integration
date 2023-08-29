@@ -4,6 +4,9 @@ const session = require("express-session");
 const mondaySdk = require("monday-sdk-js");
 const sessionStorage = require("sessionstorage");
 const bodyParser = require("body-parser");
+const fs = require("fs");
+const configFilePath = "config.json";
+const existingConfig = JSON.parse(fs.readFileSync(configFilePath, "utf8"));
 
 const app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -20,9 +23,8 @@ const loadConfig = async () => {
   try {
     const configData = require("./config.json"); // Use a static path here
     console.log("\n\n\n data of config.json : \n\n", configData);
-    console.log("\n\naccessToken : ", configData.accessToken);
-    await monday.setToken(configData.accessToken);
-    console.log("\ntoken has been set successfully");
+    // console.log("\n\naccessToken : ", configData.accessToken);
+    // await monday.setToken(configData.accessToken);
     return configData;
   } catch (error) {
     console.error("Error reading config from session storage:", error);
@@ -34,6 +36,38 @@ const saveBoardId = async (config, boardId) => {
   // Store the foundBoardId in the config object
   config.foundBoardId = boardId;
   sessionStorage.setItem("config", JSON.stringify(config));
+  existingConfig.foundBoardId = boardId;
+  fs.writeFileSync(
+    configFilePath,
+    JSON.stringify(existingConfig, null, 2),
+    "utf8"
+  );
+  console.log("Config updated and saved successfully.");
+};
+const saveClientCredentials = async (config, id, secret) => {
+  // Store the foundBoardId in the config object
+  config.clientId = id;
+  config.clientSecret = secret;
+  sessionStorage.setItem("config", JSON.stringify(config));
+  existingConfig.clientId = id;
+  existingConfig.clientSecret = secret;
+  fs.writeFileSync(
+    configFilePath,
+    JSON.stringify(existingConfig, null, 2),
+    "utf8"
+  );
+  console.log("Config updated and saved successfully.");
+};
+const saveAccessToken = async (config, token) => {
+  // Store the foundBoardId in the config object
+  config.accessToken = token;
+  sessionStorage.setItem("config", JSON.stringify(config));
+  existingConfig.accessToken = token;
+  fs.writeFileSync(
+    configFilePath,
+    JSON.stringify(existingConfig, null, 2),
+    "utf8"
+  );
   console.log("Config updated and saved successfully.");
 };
 // Function to check if a column with the given title exists in the board's columns
@@ -314,19 +348,13 @@ const getBoardData = async (boardId, res) => {
   app.post("/submit", async function (req, res) {
     console.log("\n\n\ninside /submit");
     const accessToken = req.body.accessToken;
+    console.log("\n\n accessToken in submit : ", accessToken);
 
-    // Save the access token to config.json
-    // const configPath = path.join(__dirname, "config.json");
-    // const configData = require(configPath);
-    // configData.accessToken = accessToken;
-
-    // // Write the updated data back to the config.json file
-    // myFs.writeFileSync(configPath, JSON.stringify(configData, null, 2), "utf8");
-    const config = sessionStorage.getItem("config");
-    console.log("config received : ", config);
-    config.accessToken = accessToken;
-    sessionStorage.setItem("config", JSON.stringify(config));
-
+    saveAccessToken(config, accessToken);
+    console.log(
+      "\n\n config updated now  : ",
+      sessionStorage.getItem("config")
+    );
     monday.setToken(accessToken);
     monday
       .api(`query{boards (limit:10) {id name} }`)
@@ -349,9 +377,6 @@ const getBoardData = async (boardId, res) => {
         // Handle the error and send an appropriate response
         res.status(500).send("Error fetching boards");
       });
-    // res.render("signIn", config);
-
-    // res.redirect("/"); // Redirect back to the main page
   });
   app.post("/boardSelected", async function (req, res) {
     console.log("\n\n\ninside /boardSelected");
@@ -399,18 +424,22 @@ const getBoardData = async (boardId, res) => {
 
   app.post("/submitOAuthSettings", (req, res) => {
     console.log("\n\ninside submitOAuthSettings");
-    const clientId = req.body.clientId;
-    const clientSecret = req.body.clientSecret;
-    const redirectUri = req.body.redirectUri;
+    const clientId = req.body["client-id"];
+    const clientSecret = req.body["client-secret"];
 
+    // const redirectUri = req.body.redirectUri;
+    console.log("\n\nclient id : ", clientId);
+    console.log("\n\nclient secret : ", clientSecret);
     // Read the existing content of config.json
-    const configData = sessionStorage.getItem("config");
-
-    // Update the values
-    configData.clientId = clientId;
-    configData.clientSecret = clientSecret;
-    configData.redirectUri = redirectUri;
-    sessionStorage.setItem("config", JSON.stringify(configData));
+    // const configData = JSON.parse(sessionStorage.getItem("config"));
+    // console.log("\n\nconfig data : ", configData);
+    // // Update the values
+    // configData.clientId = clientId;
+    // configData.clientSecret = clientSecret;
+    // // configData.redirectUri = redirectUri;
+    // sessionStorage.setItem("config", JSON.stringify(configData));
+    saveClientCredentials(config, clientId, clientSecret);
+    console.log(sessionStorage.getItem("config"));
     res.render("signIn");
   });
 

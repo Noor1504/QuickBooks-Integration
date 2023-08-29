@@ -10,7 +10,6 @@ router.use(express.json());
 router.use(cors());
 
 const monday = mondaySdk();
-// Assuming that app.cjs is in the same directory as api_call.js
 const {
   getBoardData,
   createColumn,
@@ -172,7 +171,7 @@ router.get("/get_cust_board_data", async function (req, res) {
       return;
     }
     // await createWorkspace();
-    console.log("\n\n\n workspace created successfully");
+
     await createCustomersColumn(boardId);
     // Call the function to get board data using the Monday API
     const boardData = await getBoardData(boardId);
@@ -340,6 +339,9 @@ router.get("/customer", function (req, res) {
 router.post("/updateCol", async function (req, res) {
   console.log("inside api call's update cols call function");
   var token = tools.getToken(req.session);
+  console.log("\n\n token in tools : ", token);
+  // token = config.accessToken;
+  // console.log("\n\ntoken in config : ", token);
   if (!token) return res.json({ error: "Not authorized" });
   if (!req.session.realmId)
     return res.json({
@@ -355,9 +357,15 @@ router.post("/updateCol", async function (req, res) {
   console.log("\n\n\n column values : ", columnValues);
   try {
     try {
-      const accessToken = config.accessToken;
-      const tokenResponse = await monday.setToken(accessToken);
-      console.log("token set : ", tokenResponse);
+      // const accessToken = config.accessToken;
+
+      try {
+        console.log("\n\naccessToken in update col apimcall ", token);
+        const tokenResponse = await monday.setToken(token);
+        console.log("token set : ", tokenResponse);
+      } catch (err) {
+        console.log("\n\nProblem in monday.set token  : ", err);
+      }
     } catch (err) {
       console.log("token err : ", err);
     }

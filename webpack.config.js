@@ -10,7 +10,7 @@ module.exports = (env, argv) => {
     },
     plugins: [
       new HtmlWebpackPlugin({
-        title: "QuickBooks Integration", 
+        title: "QuickBooks Integration",
       }),
     ],
     resolve: {

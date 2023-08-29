@@ -1,7 +1,6 @@
 {
-  "clientId": "AB37yKv4EQyx7mBVPdVDVPJn4RLoAGE4YkBWoWm6ZUqvyFR8RP",
-  "clientSecret": "0ZYUyGRnnDwQzRNDq9wbU8JzUoDJSUR41QeTpqJQ",
-  "boardId": "",
+  "clientId": "ABXKTiO25SIvDg5SxNeN1AokR7thOjn59ebpLGa2G1ZwJOPCMY",
+  "clientSecret": "qlWKpiH7DvafocM7UuNAHq3spslnbrJnbKJbskL9",
   "redirectUri": "http://localhost:3000/callback",
   "configurationEndpoint": "https://developer.api.intuit.com/.well-known/openid_sandbox_configuration/",
   "api_uri": "https://sandbox-quickbooks.api.intuit.com/v3/company/",
@@ -37,7 +36,7 @@
     ]
   },
   "_locals": {},
-  "foundBoardId": "1808846275",
+  "foundBoardId": "1811263003",
   "mode": "development",
-  "accessToken": "eyJhbGciOiJIUzI1NiJ9.eyJ0aWQiOjI3NTAyNDc4NCwiYWFpIjoxMSwidWlkIjo0NDUwNTExNCwiaWFkIjoiMjAyMy0wOC0xNFQxNzo0MzoyMS42MDhaIiwicGVyIjoibWU6d3JpdGUiLCJhY3RpZCI6MTczOTg4NTcsInJnbiI6ImFwc2UyIn0.038C_oXw8oazDkSROMFDzFMzn1-b1N8OGZve_iIMUsI"
+  "accessToken": "eyJhbGciOiJIUzI1NiJ9.eyJ0aWQiOjI3ODEwMjA0OSwiYWFpIjoxMSwidWlkIjo0NDUwNTExNCwiaWFkIjoiMjAyMy0wOC0yOVQxMToyNTo0OC4wMDBaIiwicGVyIjoibWU6d3JpdGUiLCJhY3RpZCI6MTczOTg4NTcsInJnbiI6ImFwc2UyIn0.HahnsbdXh9ZWW40Dd26dhBMFOB3X1fc7pav-iUBcuVI"
 }
